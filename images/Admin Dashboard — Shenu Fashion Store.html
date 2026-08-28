@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)http://localhost:8000/pages/admin/dashboard.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Shenu Fashion Store</title>
+  <meta name="description" content="Admin dashboard for Shenu Fashion Store management.">
+
+  <link rel="stylesheet" href="./Admin Dashboard — Shenu Fashion Store_files/main.css">
+  <link rel="stylesheet" href="./Admin Dashboard — Shenu Fashion Store_files/components.css">
+  <link rel="stylesheet" href="./Admin Dashboard — Shenu Fashion Store_files/pages.css">
+  <script src="./Admin Dashboard — Shenu Fashion Store_files/lucide.js.download"></script>
+  <script src="./Admin Dashboard — Shenu Fashion Store_files/chart.umd.min.js.download"></script>
+  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;&gt;&lt;rect width=&#39;32&#39; height=&#39;32&#39; rx=&#39;8&#39; fill=&#39;%23C9A96E&#39;/&gt;&lt;text y=&#39;22&#39; x=&#39;6&#39; font-size=&#39;20&#39; font-family=&#39;serif&#39; font-weight=&#39;bold&#39; fill=&#39;%230F0F1A&#39;&gt;S&lt;/text&gt;&lt;/svg&gt;">
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="admin-layout">
+
+    <!-- ============================================================ SIDEBAR ============================================================ -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-logo">
+        <a href="http://localhost:8000/index.html" class="navbar-logo">
+          <div class="navbar-logo-icon">S</div>
+          <div class="navbar-logo-text">SHENU <span>ADMIN</span></div>
+        </a>
+      </div>
+
+      <nav class="admin-nav">
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Overview</div>
+          <a href="http://localhost:8000/pages/admin/dashboard.html" class="admin-nav-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+            Dashboard
+          </a>
+          <a href="http://localhost:8000/pages/admin/dashboard.html#" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bar-chart-3" aria-hidden="true" class="lucide lucide-bar-chart-3"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+            Analytics
+            <span class="badge badge-gold" style="margin-left:auto; font-size:9px;">Soon</span>
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Store</div>
+          <a href="http://localhost:8000/pages/admin/products.html" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+            Products
+          </a>
+          <a href="http://localhost:8000/pages/admin/orders.html" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="package" aria-hidden="true" class="lucide lucide-package"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><path d="m7.5 4.27 9 5.15"></path></svg>
+            Orders
+            <span class="badge badge-accent" id="pending-orders-badge" style="margin-left:auto;">3</span>
+          </a>
+          <a href="http://localhost:8000/pages/admin/dashboard.html#" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="tag" aria-hidden="true" class="lucide lucide-tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+            Categories
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Users</div>
+          <a href="http://localhost:8000/pages/admin/users.html" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Customers
+          </a>
+          <a href="http://localhost:8000/pages/admin/dashboard.html#" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="star" aria-hidden="true" class="lucide lucide-star"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
+            Reviews
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">System</div>
+          <a href="http://localhost:8000/pages/admin/dashboard.html#" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Settings
+          </a>
+          <a href="http://localhost:8000/index.html" class="admin-nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="store" aria-hidden="true" class="lucide lucide-store"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"></path><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"></path></svg>
+            View Store
+          </a>
+          <button class="admin-nav-item danger" id="admin-logout" style="border:none;width:100%;text-align:left;cursor:pointer;background:none;color:var(--color-error);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="log-out" aria-hidden="true" class="lucide lucide-log-out"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>
+            Logout
+          </button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ============================================================ MAIN CONTENT ============================================================ -->
+    <main class="admin-main">
+
+      <!-- Topbar -->
+      <div class="admin-topbar">
+        <div>
+          <h1 class="admin-page-title">Dashboard</h1>
+          <p style="color:var(--color-text-muted); font-size:var(--text-sm); margin-top:2px;">Welcome back, Admin! Here's what's happening.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--space-3);">
+          <div style="font-size:var(--text-sm); color:var(--color-text-muted);" id="current-date">Friday, August 28, 2026</div>
+          <a href="http://localhost:8000/pages/admin/products.html#add" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" aria-hidden="true" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            Add Product
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-4 gap-5" style="margin-bottom:var(--space-8);" id="stats-grid">
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shopping-bag" aria-hidden="true" class="lucide lucide-shopping-bag"><path d="M16 10a4 4 0 0 1-8 0"></path><path d="M3.103 6.034h17.794"></path><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"></path></svg></div>
+            <span class="badge badge-success">+12%</span>
+          </div>
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value">3</div>
+          <div class="stat-change positive"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><i data-lucide="currency-dollar" width="20" height="20"></i></div>
+            <span class="badge badge-success">+8%</span>
+          </div>
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" style="font-size:1.5rem;">රු.&nbsp;0.00</div>
+          <div class="stat-change positive"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg></div>
+            <span class="badge badge-gold">Active</span>
+          </div>
+          <div class="stat-label">Products</div>
+          <div class="stat-value">500</div>
+          <div class="stat-change positive"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg> 5 new this week</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="users" aria-hidden="true" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+            <span class="badge badge-success">+24%</span>
+          </div>
+          <div class="stat-label">Customers</div>
+          <div class="stat-value">1</div>
+          <div class="stat-change positive"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg> vs last month</div>
+        </div>
+      </div>
+
+      <!-- Charts + Recent orders -->
+      <div style="display:grid; grid-template-columns:1fr 380px; gap:var(--space-6); margin-bottom:var(--space-8);">
+
+        <!-- Sales Chart -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-6);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-5);">
+            <h2 style="font-family:var(--font-heading); font-size:var(--text-lg); font-weight:700;">Revenue Overview</h2>
+            <select class="form-control" style="width:140px; padding:6px 10px; font-size:var(--text-xs);">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>Last 3 months</option>
+            </select>
+          </div>
+          <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="revenue-chart" width="931" height="312" style="display: block; box-sizing: border-box; height: 250px; width: 744px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Quick Stats / Top Categories -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-6);">
+          <h2 style="font-family:var(--font-heading); font-size:var(--text-lg); font-weight:700; margin-bottom:var(--space-5);">Top Categories</h2>
+          <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="category-chart" width="413" height="312" style="display: block; box-sizing: border-box; height: 250px; width: 330px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders + Low Stock -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-6);">
+
+        <!-- Recent Orders -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); overflow:hidden;">
+          <div style="padding:var(--space-5); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between;">
+            <h2 style="font-family:var(--font-heading); font-size:var(--text-base); font-weight:700;">Recent Orders</h2>
+            <a href="http://localhost:8000/pages/admin/orders.html" style="font-size:var(--text-xs); color:var(--color-gold);">View All →</a>
+          </div>
+          <div id="recent-orders-table" style="padding:0;">
+            <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm);">
+              <thead>
+                <tr style="background:var(--color-surface-2);">
+                  <th style="padding:10px 16px; text-align:left; font-size:var(--text-xs); color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">Order</th>
+                  <th style="padding:10px 16px; text-align:left; font-size:var(--text-xs); color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">Customer</th>
+                  <th style="padding:10px 16px; text-align:left; font-size:var(--text-xs); color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">Amount</th>
+                  <th style="padding:10px 16px; text-align:left; font-size:var(--text-xs); color:var(--color-text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.08em;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-tbody">
+        <tr style="border-bottom:1px solid var(--color-border); cursor:pointer;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <td style="padding:12px 16px; font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">#PmJ0Dj0uJFLNgt4PZHtK</td>
+          <td style="padding:12px 16px; color:var(--color-text-muted);">mano abeerthna</td>
+          <td style="padding:12px 16px; font-weight:600;">LKR 22,080</td>
+          <td style="padding:12px 16px;"><span class="badge badge-warning">Pending</span></td>
+        </tr>
+      
+        <tr style="border-bottom:1px solid var(--color-border); cursor:pointer;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <td style="padding:12px 16px; font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">#QlGWmF1IrcqKkwQPdatc</td>
+          <td style="padding:12px 16px; color:var(--color-text-muted);">mano abeerthna</td>
+          <td style="padding:12px 16px; font-weight:600;">LKR 5,520</td>
+          <td style="padding:12px 16px;"><span class="badge badge-warning">Pending</span></td>
+        </tr>
+      
+        <tr style="border-bottom:1px solid var(--color-border); cursor:pointer;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <td style="padding:12px 16px; font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">#hc6iuVAdjEkXdZJhrBFS</td>
+          <td style="padding:12px 16px; color:var(--color-text-muted);">gs sdgs</td>
+          <td style="padding:12px 16px; font-weight:600;">LKR 22,080</td>
+          <td style="padding:12px 16px;"><span class="badge badge-warning">Pending</span></td>
+        </tr>
+      </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); overflow:hidden;">
+          <div style="padding:var(--space-5); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between;">
+            <h2 style="font-family:var(--font-heading); font-size:var(--text-base); font-weight:700;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-triangle" aria-hidden="true" style="display:inline;vertical-align:middle;color:var(--color-warning);margin-right:6px;" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+              Low Stock
+            </h2>
+            <a href="http://localhost:8000/pages/admin/products.html" style="font-size:var(--text-xs); color:var(--color-gold);">Manage →</a>
+          </div>
+          <div id="low-stock-list" style="padding:var(--space-4);">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); transition: background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Shirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Gold Belt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Accessories</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Designer Skirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Summer Jeans</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Formal Heels</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Elegant Top</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Travel Clutch</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Bags</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Boots</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Cocktail Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Elegant Top</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual T-Shirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Shirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Boho Sundress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">1 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Silver Sunglasses</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Accessories</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Classic Jacket</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Chic Jacket</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Maxi Dress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Jeans</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Cocktail Dress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Formal T-Shirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Chic Jacket</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Classic Trousers</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Floral Sundress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Blouse</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">2 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Evening Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Minimalist Bracelet</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Accessories</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Summer Skirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Boots</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Maxi Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Formal Hoodie</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">3 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Designer Skirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Floral Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Urban Jacket</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Designer Crossbody</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Bags</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Casual Heels</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Minimalist Necklace</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Accessories</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Sport Sneakers</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Leather Sneakers</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Urban Hoodie</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">4 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Boho Dress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Leather Crossbody Bag</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Bags</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Boho Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Boho Gown</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Designer Top</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Maxi Dress</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Dresses</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Summer Top</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Women</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Leather Sandals</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Shoes</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Leather Crossbody Bag</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Bags</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background=&#39;var(--color-surface-2)&#39;" onmouseout="this.style.background=&#39;&#39;">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shirt" aria-hidden="true" style="color:var(--color-warning);" class="lucide lucide-shirt"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">Formal Shirt</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Men</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">5 left</span>
+        </div>
+      </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { getDashboardStats } from '../../js/admin.js';
+    import { logoutUser } from '../../js/auth.js';
+
+    lucide.createIcons();
+
+    // Current date
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+    // Load dashboard
+    async function loadDashboard() {
+      const stats = await getDashboardStats();
+      renderStats(stats);
+      renderRecentOrders(stats.recentOrders);
+      renderLowStock(stats.lowStockProducts);
+      initCharts();
+    }
+
+    function renderStats(stats) {
+      document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><i data-lucide="shopping-bag" width="20" height="20"></i></div>
+            <span class="badge badge-success">+12%</span>
+          </div>
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value">${stats.totalOrders.toLocaleString()}</div>
+          <div class="stat-change positive"><i data-lucide="trending-up" width="12" height="12"></i> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><i data-lucide="currency-dollar" width="20" height="20"></i></div>
+            <span class="badge badge-success">+8%</span>
+          </div>
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" style="font-size:1.5rem;">${window.formatCurrency ? window.formatCurrency(stats.totalRevenue) : 'LKR ' + stats.totalRevenue.toLocaleString()}</div>
+          <div class="stat-change positive"><i data-lucide="trending-up" width="12" height="12"></i> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><i data-lucide="shirt" width="20" height="20"></i></div>
+            <span class="badge badge-gold">Active</span>
+          </div>
+          <div class="stat-label">Products</div>
+          <div class="stat-value">${stats.totalProducts.toLocaleString()}</div>
+          <div class="stat-change positive"><i data-lucide="trending-up" width="12" height="12"></i> 5 new this week</div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div class="feature-icon" style="width:44px;height:44px;background:var(--color-gold-glow);"><i data-lucide="users" width="20" height="20"></i></div>
+            <span class="badge badge-success">+24%</span>
+          </div>
+          <div class="stat-label">Customers</div>
+          <div class="stat-value">${stats.totalUsers.toLocaleString()}</div>
+          <div class="stat-change positive"><i data-lucide="trending-up" width="12" height="12"></i> vs last month</div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function renderRecentOrders(orders) {
+      const demoOrders = [
+        { id:'ORD-001', userName:'Ayesha F.', total:7400, status:'delivered' },
+        { id:'ORD-002', userName:'Kasun P.',  total:3800, status:'shipped'   },
+        { id:'ORD-003', userName:'Sanduni S.',total:5200, status:'processing'},
+        { id:'ORD-004', userName:'Nimali D.', total:9900, status:'pending'   },
+        { id:'ORD-005', userName:'Ruwan M.',  total:4500, status:'delivered' },
+      ];
+      const data = orders.length > 0 ? orders : demoOrders;
+
+      document.getElementById('recent-orders-tbody').innerHTML = data.map(o => `
+        <tr style="border-bottom:1px solid var(--color-border); cursor:pointer;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background=''">
+          <td style="padding:12px 16px; font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">#${o.id}</td>
+          <td style="padding:12px 16px; color:var(--color-text-muted);">${o.userName || o.userEmail || 'Customer'}</td>
+          <td style="padding:12px 16px; font-weight:600;">LKR ${(o.total||0).toLocaleString()}</td>
+          <td style="padding:12px 16px;">${window.statusBadge ? window.statusBadge(o.status) : `<span class="badge badge-gold">${o.status}</span>`}</td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderLowStock(products) {
+      const demoLow = [
+        { name:'Black Leather Jacket', stock:2, category:'Women' },
+        { name:'Vintage Denim Jeans', stock:1, category:'Men' },
+        { name:'Gold Anklet Bracelet', stock:3, category:'Accessories' },
+      ];
+      const data = products.length > 0 ? products : demoLow;
+
+      document.getElementById('low-stock-list').innerHTML = data.map(p => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);transition:background 0.2s;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background=''">
+          <div style="width:36px;height:36px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="shirt" width="16" height="16" style="color:var(--color-warning);"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:var(--text-sm);font-weight:600;">${p.name}</div>
+            <div style="font-size:var(--text-xs);color:var(--color-text-muted);">${p.category}</div>
+          </div>
+          <span style="font-size:var(--text-xs);font-weight:700;color:var(--color-warning);background:rgba(245,158,11,0.1);padding:4px 10px;border-radius:999px;">${p.stock} left</span>
+        </div>
+      `).join('') || '<div style="text-align:center;color:var(--color-success);padding:24px;font-size:var(--text-sm);">✅ All products are well stocked!</div>';
+      lucide.createIcons();
+    }
+
+    function initCharts() {
+      // Revenue line chart
+      const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
+      new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Revenue (LKR)',
+            data: [45000, 52000, 38000, 67000, 89000, 72000, 95000],
+            borderColor: '#C9A96E',
+            backgroundColor: 'rgba(201, 169, 110, 0.08)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#C9A96E',
+            pointBorderColor: '#0F0F1A',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1A1A2E',
+              borderColor: 'rgba(201,169,110,0.3)',
+              borderWidth: 1,
+              titleColor: '#C9A96E',
+              bodyColor: '#9A9AB0',
+              callbacks: { label: ctx => `LKR ${ctx.parsed.y.toLocaleString()}` }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#9A9AB0', font: { size: 12 } }
+            },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#9A9AB0', font: { size: 12 }, callback: v => 'LKR ' + (v/1000) + 'k' }
+            }
+          }
+        }
+      });
+
+      // Category doughnut chart
+      const catCtx = document.getElementById('category-chart').getContext('2d');
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Women', 'Men', 'Accessories', 'Dresses', 'Shoes', 'Bags'],
+          datasets: [{
+            data: [35, 25, 15, 12, 8, 5],
+            backgroundColor: ['#C9A96E','#E94560','#4CAF6E','#60A5FA','#F59E0B','#A78BFA'],
+            borderColor: '#1A1A2E',
+            borderWidth: 3,
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#9A9AB0', padding: 16, font: { size: 11 }, boxWidth: 12, boxHeight: 12 }
+            },
+            tooltip: {
+              backgroundColor: '#1A1A2E',
+              borderColor: 'rgba(201,169,110,0.3)',
+              borderWidth: 1,
+              titleColor: '#F0EDE8',
+              bodyColor: '#9A9AB0',
+              callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` }
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById('admin-logout')?.addEventListener('click', () => logoutUser());
+    loadDashboard();
+  </script>
+
+  <script src="./Admin Dashboard — Shenu Fashion Store_files/app.js.download" type="module"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+
+
+</body></html>

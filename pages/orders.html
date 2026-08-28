@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — Shenu Fashion Store</title>
+  <meta name="description" content="Track and manage your orders at Shenu Fashion Store." />
+
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar scrolled" id="main-navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">S</div>
+        <div class="navbar-logo-text">SHENU <span>FASHION</span></div>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="products.html" class="nav-link">Products</a></li>
+        <li><a href="orders.html" class="nav-link active">My Orders</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <a href="cart.html" class="navbar-icon-btn">
+          <i data-lucide="shopping-bag" width="18" height="18"></i>
+          <span class="badge-count" id="cart-count-badge" style="display:none">0</span>
+        </a>
+        <div class="user-dropdown" data-auth="logged-in" style="display:none">
+          <button id="user-menu-btn" style="background:none;border:none;cursor:pointer;">
+            <img src="" alt="" class="navbar-avatar" id="navbar-avatar" style="display:none;" />
+            <div id="navbar-initials" class="navbar-avatar" style="background:var(--gradient-gold);color:#0F0F1A;font-family:var(--font-heading);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;display:none;"></div>
+          </button>
+          <div class="dropdown-menu" id="user-dropdown">
+            <div class="dropdown-header">
+              <div class="user-name" id="dropdown-name"></div>
+              <div class="user-email" id="dropdown-email"></div>
+            </div>
+            <a href="profile.html" class="dropdown-item"><i data-lucide="user" width="16" height="16"></i> My Profile</a>
+            <a href="orders.html" class="dropdown-item"><i data-lucide="package" width="16" height="16"></i> My Orders</a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" id="logout-btn"><i data-lucide="log-out" width="16" height="16"></i> Sign Out</button>
+          </div>
+        </div>
+        <div data-auth="logged-out"><a href="login.html" class="btn btn-primary btn-sm">Sign In</a></div>
+      </div>
+    </div>
+  </nav>
+
+  <main style="padding-top:calc(var(--navbar-height) + var(--space-8)); min-height:100vh; padding-bottom:var(--space-16);">
+    <div class="container">
+
+      <!-- Header -->
+      <div style="margin-bottom:var(--space-8);">
+        <nav class="breadcrumb" style="margin-bottom:var(--space-3);">
+          <div class="breadcrumb-item"><a href="../index.html">Home</a></div>
+          <div class="breadcrumb-separator"><i data-lucide="chevron-right" width="14" height="14"></i></div>
+          <div class="breadcrumb-item current">My Orders</div>
+        </nav>
+        <h1 class="heading-1">My Orders</h1>
+        <p class="text-muted" style="margin-top:4px;" id="orders-count">Loading your orders...</p>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="filter-chips" style="margin-bottom:var(--space-6);">
+        <button class="chip active" onclick="filterOrders('all', this)">All Orders</button>
+        <button class="chip" onclick="filterOrders('pending', this)">⏳ Pending</button>
+        <button class="chip" onclick="filterOrders('processing', this)">🔄 Processing</button>
+        <button class="chip" onclick="filterOrders('shipped', this)">🚚 Shipped</button>
+        <button class="chip" onclick="filterOrders('delivered', this)">✅ Delivered</button>
+        <button class="chip" onclick="filterOrders('cancelled', this)">❌ Cancelled</button>
+      </div>
+
+      <!-- Orders list -->
+      <div id="orders-container">
+        <!-- Skeleton loaders -->
+        <div class="skeleton" style="height:160px; border-radius:var(--radius-xl); margin-bottom:12px;"></div>
+        <div class="skeleton" style="height:160px; border-radius:var(--radius-xl); margin-bottom:12px;"></div>
+        <div class="skeleton" style="height:160px; border-radius:var(--radius-xl);"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-orders" style="display:none;">
+        <div class="empty-state-icon"><i data-lucide="package" width="36" height="36"></i></div>
+        <div class="empty-state-title">No Orders Found</div>
+        <div class="empty-state-description">You haven't placed any orders yet. Start shopping to see your orders here!</div>
+        <a href="products.html" class="btn btn-primary btn-lg" style="margin-top:16px;">
+          <i data-lucide="shopping-bag" width="18" height="18"></i>
+          Start Shopping
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ORDER DETAIL MODAL -->
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-order-id">Order #000000</div>
+        <button class="modal-close" onclick="closeOrderModal()"><i data-lucide="x" width="16" height="16"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- Order timeline -->
+        <div class="order-timeline" id="modal-timeline"></div>
+        <div class="divider-gold"></div>
+        <!-- Order items -->
+        <div id="modal-items"></div>
+        <!-- Order totals -->
+        <div id="modal-totals" style="margin-top:16px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancel-order-btn" onclick="cancelOrderAction()">Cancel Order</button>
+        <a href="products.html" class="btn btn-primary">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getUserOrders, cancelOrder, ORDER_STATUSES, renderOrderTimeline } from '../js/orders.js';
+    import { logoutUser } from '../js/auth.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { auth } from '../js/firebase-config.js';
+
+    lucide.createIcons();
+
+    let allOrders = [];
+    let currentFilter = 'all';
+
+    // Demo orders for display when Firebase not configured
+    const demoOrders = [
+      { id:'ORD-001234', status:'delivered', createdAt:{ toDate:()=>new Date('2026-08-01') }, total:11700, items:[{name:'Floral Summer Dress', quantity:1, price:3200},{name:'Leather Crossbody Bag', quantity:1, price:6500}], shippingAddress:{firstName:'Ashan', city:'Colombo'} },
+      { id:'ORD-001187', status:'shipped',   createdAt:{ toDate:()=>new Date('2026-08-15') }, total:3800, items:[{name:'Classic Oxford Shirt', quantity:1, price:3800}], shippingAddress:{firstName:'Ashan', city:'Gampaha'} },
+      { id:'ORD-001056', status:'pending',   createdAt:{ toDate:()=>new Date('2026-08-25') }, total:5200, items:[{name:'Silk Evening Blouse', quantity:1, price:5200}], shippingAddress:{firstName:'Ashan', city:'Colombo'} },
+    ];
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // Show demo orders if not logged in
+        allOrders = demoOrders;
+        renderOrders(allOrders);
+        return;
+      }
+
+      try {
+        allOrders = await getUserOrders();
+        if (allOrders.length === 0) allOrders = demoOrders; // fallback
+      } catch {
+        allOrders = demoOrders;
+      }
+      renderOrders(allOrders);
+    });
+
+    function renderOrders(orders) {
+      const container = document.getElementById('orders-container');
+      const emptyEl   = document.getElementById('empty-orders');
+
+      document.getElementById('orders-count').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''} found`;
+
+      if (orders.length === 0) {
+        container.innerHTML = '';
+        emptyEl.style.display = 'flex';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      container.innerHTML = orders.map(order => {
+        const info  = ORDER_STATUSES[order.status] || ORDER_STATUSES['pending'];
+        const date  = order.createdAt?.toDate ? window.formatDate(order.createdAt.toDate()) : 'N/A';
+        const items = order.items || [];
+        return `
+          <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5); margin-bottom:var(--space-4); transition:all 0.3s; cursor:pointer;" onmouseover="this.style.borderColor='var(--color-border-hover)'" onmouseout="this.style.borderColor='var(--color-border)'" onclick="openOrderModal('${order.id}')">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+              <div>
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                  <span style="font-family:var(--font-heading); font-size:var(--text-base); font-weight:700;">#${order.id}</span>
+                  <span class="badge badge-${order.status === 'delivered' ? 'success' : order.status === 'cancelled' ? 'accent' : order.status === 'shipped' ? 'gold' : 'warning'}">${info.label}</span>
+                </div>
+                <div style="font-size:var(--text-sm); color:var(--color-text-muted);">Placed on ${date}</div>
+                <div style="font-size:var(--text-sm); color:var(--color-text-muted); margin-top:4px;">
+                  ${items.length > 0
+                    ? items.slice(0,2).map(i => i.name).join(', ') + (items.length > 2 ? ` +${items.length - 2} more` : '')
+                    : '—'
+                  }
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-family:var(--font-heading); font-size:var(--text-xl); font-weight:700; color:var(--color-gold);">${window.formatCurrency(order.total || 0)}</div>
+                <div style="font-size:var(--text-xs); color:var(--color-text-faint); margin-top:4px;">${items.length} item${items.length !== 1 ? 's' : ''}</div>
+              </div>
+            </div>
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--color-border); display:flex; align-items:center; gap:8px;">
+              <!-- Progress bar -->
+              <div style="flex:1; height:4px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                ${order.status !== 'cancelled'
+                  ? `<div style="height:100%; border-radius:999px; background:var(--gradient-gold); width:${ {pending:25,processing:50,shipped:75,delivered:100}[order.status] || 25 }%; transition:width 0.5s ease;"></div>`
+                  : `<div style="height:100%; border-radius:999px; background:var(--color-error); width:100%;"></div>`
+                }
+              </div>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted); white-space:nowrap;">${info.label}</span>
+              <i data-lucide="chevron-right" width="14" height="14" style="color:var(--color-text-faint);"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    window.filterOrders = (status, btn) => {
+      document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = status;
+      const filtered = status === 'all' ? allOrders : allOrders.filter(o => o.status === status);
+      renderOrders(filtered);
+    };
+
+    // Modal
+    window.openOrderModal = (orderId) => {
+      const order = allOrders.find(o => o.id === orderId) || demoOrders.find(o => o.id === orderId);
+      if (!order) return;
+
+      document.getElementById('modal-order-id').textContent = `Order #${order.id}`;
+      document.getElementById('modal-timeline').innerHTML = renderOrderTimeline(order);
+
+      const items = order.items || [];
+      document.getElementById('modal-items').innerHTML = `
+        <h3 style="font-size:var(--text-sm); font-weight:600; margin-bottom:12px;">Items Ordered</h3>
+        ${items.map(item => `
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:var(--text-sm);">
+            <div style="width:36px;height:36px;background:var(--color-surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="shirt" width="16" height="16" style="color:var(--color-text-faint);"></i>
+            </div>
+            <div style="flex:1;">${item.name || 'Product'} <span style="color:var(--color-text-muted);">× ${item.quantity || 1}</span></div>
+            <div style="color:var(--color-gold);font-weight:600;">${window.formatCurrency((item.price || 0) * (item.quantity || 1))}</div>
+          </div>
+        `).join('')}
+      `;
+
+      document.getElementById('modal-totals').innerHTML = `
+        <div class="summary-row"><span>Subtotal</span><span>${window.formatCurrency(order.subtotal || order.total || 0)}</span></div>
+        <div class="summary-row"><span>Delivery</span><span style="color:var(--color-success);">${window.formatCurrency(order.deliveryFee || 0)}</span></div>
+        <div class="summary-row total"><span>Total</span><span class="amount">${window.formatCurrency(order.total || 0)}</span></div>
+      `;
+
+      // Show cancel only for pending/processing
+      const cancelBtn = document.getElementById('cancel-order-btn');
+      cancelBtn.style.display = ['pending','processing'].includes(order.status) ? '' : 'none';
+      cancelBtn.dataset.orderId = orderId;
+
+      document.getElementById('order-modal').classList.add('open');
+      lucide.createIcons();
+    };
+
+    window.closeOrderModal = () => {
+      document.getElementById('order-modal').classList.remove('open');
+    };
+
+    window.cancelOrderAction = async () => {
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+      const orderId = document.getElementById('cancel-order-btn').dataset.orderId;
+      const result = await cancelOrder(orderId);
+      if (result.success) {
+        showToast('Order cancelled successfully.', 'info');
+        closeOrderModal();
+        allOrders = await getUserOrders().catch(() => demoOrders);
+        renderOrders(allOrders);
+      } else {
+        showToast(result.error || 'Cannot cancel this order.', 'error');
+      }
+    };
+
+    document.getElementById('order-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('order-modal')) closeOrderModal();
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', () => logoutUser());
+  </script>
+
+  <script src="../js/app.js" type="module"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+</body>
+</html>

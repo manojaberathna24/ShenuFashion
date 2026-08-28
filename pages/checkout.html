@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — Shenu Fashion Store</title>
+  <meta name="description" content="Complete your purchase at Shenu Fashion Store. Secure checkout with multiple payment options." />
+
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+
+  <style>
+    .step-panel { display: none; }
+    .step-panel.active { display: block; animation: fadeIn 0.4s ease; }
+    .payment-method-card {
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+    .payment-method-card.selected { border-color: var(--color-gold); background: var(--color-gold-glow); }
+    .payment-method-card:hover { border-color: var(--color-border-hover); }
+  </style>
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- Minimal Navbar -->
+  <nav style="height:var(--navbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); position:sticky; top:0; z-index:var(--z-sticky);">
+    <a href="../index.html" class="navbar-logo">
+      <div class="navbar-logo-icon">S</div>
+      <div class="navbar-logo-text">SHENU <span>FASHION</span></div>
+    </a>
+    <div style="display:flex; align-items:center; gap:var(--space-3);">
+      <i data-lucide="shield-check" width="16" height="16" style="color:var(--color-success);"></i>
+      <span style="font-size:var(--text-sm); color:var(--color-text-muted);">Secure Checkout</span>
+    </div>
+    <a href="cart.html" style="font-size:var(--text-sm); color:var(--color-text-muted); display:flex; align-items:center; gap:6px;">
+      <i data-lucide="arrow-left" width="14" height="14"></i>
+      Back to Cart
+    </a>
+  </nav>
+
+  <main style="padding: var(--space-8) 0; min-height: calc(100vh - var(--navbar-height));">
+    <div class="container" style="max-width:1100px;">
+
+      <!-- Steps -->
+      <div class="checkout-steps" style="margin-bottom:var(--space-10);">
+        <div class="checkout-step active" id="step-indicator-1">
+          <div class="step-number">1</div>
+          <div class="step-label">Delivery</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="checkout-step" id="step-indicator-2">
+          <div class="step-number">2</div>
+          <div class="step-label">Payment</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="checkout-step" id="step-indicator-3">
+          <div class="step-number">3</div>
+          <div class="step-label">Confirm</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 380px; gap:var(--space-8); align-items:start;">
+
+        <!-- Left: Steps -->
+        <div>
+
+          <!-- STEP 1: Delivery Address -->
+          <div class="step-panel active" id="step-1">
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2xl); padding:var(--space-8);">
+              <h2 style="font-family:var(--font-heading); font-size:var(--text-2xl); font-weight:700; margin-bottom:var(--space-6);">
+                <i data-lucide="map-pin" width="22" height="22" style="display:inline; vertical-align:middle; margin-right:8px; color:var(--color-gold);"></i>
+                Delivery Address
+              </h2>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                <div class="form-group">
+                  <label class="form-label">First Name <span class="required">*</span></label>
+                  <input type="text" id="first-name" class="form-control" placeholder="Ashan" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name <span class="required">*</span></label>
+                  <input type="text" id="last-name" class="form-control" placeholder="Perera" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Phone Number <span class="required">*</span></label>
+                <div class="form-control-icon">
+                  <i data-lucide="phone" width="16" height="16" class="icon"></i>
+                  <input type="tel" id="phone" class="form-control" placeholder="+94 77 123 4567" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Address Line 1 <span class="required">*</span></label>
+                <div class="form-control-icon">
+                  <i data-lucide="home" width="16" height="16" class="icon"></i>
+                  <input type="text" id="address1" class="form-control" placeholder="123, Galle Road" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Address Line 2</label>
+                <input type="text" id="address2" class="form-control" placeholder="Apartment, suite, unit, etc." />
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                <div class="form-group">
+                  <label class="form-label">City <span class="required">*</span></label>
+                  <input type="text" id="city" class="form-control" placeholder="Colombo" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">District <span class="required">*</span></label>
+                  <select id="district" class="form-control" required>
+                    <option value="">Select District</option>
+                    <option>Colombo</option><option>Gampaha</option><option>Kandy</option>
+                    <option>Galle</option><option>Matara</option><option>Jaffna</option>
+                    <option>Kurunegala</option><option>Ratnapura</option><option>Badulla</option>
+                    <option>Trincomalee</option><option>Batticaloa</option><option>Ampara</option>
+                    <option>Anuradhapura</option><option>Polonnaruwa</option><option>Hambantota</option>
+                    <option>Kalutara</option><option>Kegalle</option><option>Matale</option>
+                    <option>Monaragala</option><option>Nuwara Eliya</option><option>Puttalam</option>
+                    <option>Vavuniya</option><option>Mullaitivu</option><option>Kilinochchi</option>
+                    <option>Mannar</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-check">
+                  <input type="checkbox" id="save-address" checked />
+                  <span class="form-check-label">Save this address for future orders</span>
+                </label>
+              </div>
+
+              <div style="margin-top:var(--space-6);">
+                <button class="btn btn-primary btn-lg" onclick="goToStep(2)">
+                  Continue to Payment
+                  <i data-lucide="arrow-right" width="18" height="18"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Payment -->
+          <div class="step-panel" id="step-2">
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2xl); padding:var(--space-8);">
+              <h2 style="font-family:var(--font-heading); font-size:var(--text-2xl); font-weight:700; margin-bottom:var(--space-6);">
+                <i data-lucide="credit-card" width="22" height="22" style="display:inline; vertical-align:middle; margin-right:8px; color:var(--color-gold);"></i>
+                Payment Method
+              </h2>
+
+              <div style="display:flex; flex-direction:column; gap:var(--space-3); margin-bottom:var(--space-6);">
+                <!-- Card Payment -->
+                <div class="payment-method-card selected" id="method-card" onclick="selectPayment('card')">
+                  <input type="radio" name="payment" value="card" checked style="accent-color:var(--color-gold);" />
+                  <div>
+                    <div style="font-weight:600; font-size:var(--text-sm); margin-bottom:2px;">Credit / Debit Card</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Visa, Mastercard, American Express</div>
+                  </div>
+                  <div style="margin-left:auto; display:flex; gap:6px;">
+                    <span style="background:#1A1F71; color:#fff; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700;">VISA</span>
+                    <span style="background:#EB001B; color:#fff; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700;">MC</span>
+                  </div>
+                </div>
+
+                <!-- COD -->
+                <div class="payment-method-card" id="method-cod" onclick="selectPayment('cod')">
+                  <input type="radio" name="payment" value="cod" style="accent-color:var(--color-gold);" />
+                  <div>
+                    <div style="font-weight:600; font-size:var(--text-sm); margin-bottom:2px;">Cash on Delivery</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Pay when you receive your order</div>
+                  </div>
+                  <div style="margin-left:auto;">
+                    <i data-lucide="banknote" width="24" height="24" style="color:var(--color-success);"></i>
+                  </div>
+                </div>
+
+                <!-- PayPal -->
+                <div class="payment-method-card" id="method-paypal" onclick="selectPayment('paypal')">
+                  <input type="radio" name="payment" value="paypal" style="accent-color:var(--color-gold);" />
+                  <div>
+                    <div style="font-weight:600; font-size:var(--text-sm); margin-bottom:2px;">PayPal</div>
+                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">Pay fast and securely with your PayPal account</div>
+                  </div>
+                  <div style="margin-left:auto;">
+                    <span style="background:#003087; color:#fff; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700;"><i>Pay</i>Pal</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Details -->
+              <div id="card-details">
+                <div class="form-group">
+                  <label class="form-label">Card Number</label>
+                  <div class="form-control-icon">
+                    <i data-lucide="credit-card" width="16" height="16" class="icon"></i>
+                    <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19"
+                      oninput="formatCardNumber(this)" />
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+                  <div class="form-group">
+                    <label class="form-label">Expiry Date</label>
+                    <input type="text" id="expiry" class="form-control" placeholder="MM/YY" maxlength="5"
+                      oninput="formatExpiry(this)" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV</label>
+                    <div class="form-control-icon">
+                      <i data-lucide="lock" width="16" height="16" class="icon"></i>
+                      <input type="text" id="cvv" class="form-control" placeholder="123" maxlength="4" />
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Name on Card</label>
+                  <input type="text" id="card-name" class="form-control" placeholder="ASHAN PERERA" />
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; font-size:var(--text-xs); color:var(--color-text-faint); margin-bottom:var(--space-4);">
+                  <i data-lucide="shield-check" width="14" height="14" style="color:var(--color-success);"></i>
+                  Your card details are encrypted and secure
+                </div>
+              </div>
+
+              <div style="display:flex; gap:var(--space-3);">
+                <button class="btn btn-ghost btn-lg" onclick="goToStep(1)">
+                  <i data-lucide="arrow-left" width="18" height="18"></i>
+                  Back
+                </button>
+                <button class="btn btn-primary btn-lg" onclick="goToStep(3)" style="flex:1;">
+                  Review Order
+                  <i data-lucide="arrow-right" width="18" height="18"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Confirm -->
+          <div class="step-panel" id="step-3">
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2xl); padding:var(--space-8);">
+              <h2 style="font-family:var(--font-heading); font-size:var(--text-2xl); font-weight:700; margin-bottom:var(--space-6);">
+                <i data-lucide="check-square" width="22" height="22" style="display:inline; vertical-align:middle; margin-right:8px; color:var(--color-gold);"></i>
+                Confirm Order
+              </h2>
+
+              <!-- Delivery summary -->
+              <div style="background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5); margin-bottom:var(--space-5);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+                  <div style="font-weight:600; font-size:var(--text-sm); display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="map-pin" width="14" height="14" style="color:var(--color-gold);"></i>
+                    Delivery Address
+                  </div>
+                  <button onclick="goToStep(1)" style="background:none; border:none; color:var(--color-gold); font-size:var(--text-xs); cursor:pointer;">Edit</button>
+                </div>
+                <div id="confirm-address" style="font-size:var(--text-sm); color:var(--color-text-muted); line-height:1.8;"></div>
+              </div>
+
+              <!-- Payment summary -->
+              <div style="background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5); margin-bottom:var(--space-5);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3);">
+                  <div style="font-weight:600; font-size:var(--text-sm); display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="credit-card" width="14" height="14" style="color:var(--color-gold);"></i>
+                    Payment Method
+                  </div>
+                  <button onclick="goToStep(2)" style="background:none; border:none; color:var(--color-gold); font-size:var(--text-xs); cursor:pointer;">Edit</button>
+                </div>
+                <div id="confirm-payment" style="font-size:var(--text-sm); color:var(--color-text-muted);"></div>
+              </div>
+
+              <!-- Items summary -->
+              <div id="confirm-items" style="margin-bottom:var(--space-6);"></div>
+
+              <div style="display:flex; gap:var(--space-3);">
+                <button class="btn btn-ghost btn-lg" onclick="goToStep(2)">
+                  <i data-lucide="arrow-left" width="18" height="18"></i>
+                  Back
+                </button>
+                <button class="btn btn-primary btn-lg" id="place-order-btn" onclick="placeOrder()" style="flex:1;">
+                  <span class="btn-text">
+                    <i data-lucide="shopping-bag" width="18" height="18"></i>
+                    Place Order
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUCCESS STATE -->
+          <div class="step-panel" id="step-success">
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2xl); padding:var(--space-12); text-align:center;">
+              <div style="width:80px;height:80px;border-radius:50%;background:rgba(76,175,110,0.15);border:2px solid var(--color-success);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-6);">
+                <i data-lucide="check" width="40" height="40" style="color:var(--color-success);"></i>
+              </div>
+              <h2 style="font-family:var(--font-heading); font-size:var(--text-3xl); font-weight:800; margin-bottom:var(--space-3);">Order Placed! 🎉</h2>
+              <p style="color:var(--color-text-muted); font-size:var(--text-lg); margin-bottom:var(--space-2);">Thank you for shopping at Shenu Fashion!</p>
+              <p style="color:var(--color-text-faint); font-size:var(--text-sm); margin-bottom:var(--space-8);">Your order <strong id="success-order-id" style="color:var(--color-gold);"></strong> has been placed successfully. We'll send you updates!</p>
+              <div style="display:flex; gap:var(--space-4); justify-content:center; flex-wrap:wrap;">
+                <a href="orders.html" class="btn btn-primary btn-lg">
+                  <i data-lucide="package" width="18" height="18"></i>
+                  Track My Order
+                </a>
+                <a href="products.html" class="btn btn-ghost btn-lg">Continue Shopping</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="order-summary-card" style="position:sticky; top:calc(var(--navbar-height) + 24px);">
+          <h3 style="font-family:var(--font-heading); font-size:var(--text-lg); font-weight:700; margin-bottom:var(--space-5);">Order Summary</h3>
+          <div id="checkout-items" style="margin-bottom:var(--space-5); max-height:260px; overflow-y:auto;"></div>
+          <div class="summary-row"><span>Subtotal</span><span id="co-subtotal">LKR 0.00</span></div>
+          <div class="summary-row"><span>Delivery</span><span id="co-delivery">LKR 350.00</span></div>
+          <div class="summary-row total"><span>Total</span><span class="amount" id="co-total">LKR 0.00</span></div>
+          <div style="margin-top:var(--space-4); display:flex; align-items:center; gap:8px; font-size:var(--text-xs); color:var(--color-text-faint);">
+            <i data-lucide="shield-check" width="14" height="14" style="color:var(--color-success);"></i>
+            SSL encrypted & secure
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/app.js" type="module"></script>
+  <script type="module">
+    import { createOrder } from '../js/orders.js';
+    import { getLocalCart } from '../js/cart.js';
+    import { getProductsByIds } from '../js/products.js';
+    import { requireAuth } from '../js/auth.js';
+
+    lucide.createIcons();
+
+    let currentStep = 1;
+    let selectedPayment = 'card';
+    let orderId = null;
+
+    // Load cart items on page load
+    window.lastCalculatedTotals = { subtotal: 0, delivery: 0, total: 0 };
+    
+    async function loadCheckoutSummary() {
+      const cart = getLocalCart();
+      const productIds = [...new Set(cart.map(i => i.productId))];
+      
+      let products = [];
+      try {
+        if (productIds.length > 0) products = await getProductsByIds(productIds);
+      } catch {}
+
+      const demos = {
+        'd1': { name:'Floral Summer Dress', price:3200 }, 'd2': { name:'Classic Oxford Shirt', price:3800 },
+        'd3': { name:'Leather Crossbody Bag', price:6500 }, 'd4': { name:'Silk Evening Blouse', price:5200 },
+      };
+
+      const productMap = {};
+      products.forEach(p => productMap[p.id] = p);
+
+      let subtotal = 0;
+      const itemsHtml = cart.map(item => {
+        const prod = productMap[item.productId] || demos[item.productId] || { name:`Product`, price:0, salePrice:0 };
+        const price = prod.salePrice || prod.price || 0;
+        subtotal += price * (item.quantity || 1);
+        const name = prod.name;
+        
+        return `
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:var(--text-sm);">
+            <div style="width:40px;height:50px;background:var(--color-surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--color-border);">
+              <i data-lucide="shirt" width="16" height="16" style="color:var(--color-text-faint);"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:500;">${name}</div>
+              <div style="color:var(--color-text-muted);">Qty: ${item.quantity || 1}</div>
+            </div>
+            <div style="font-weight:600; color:var(--color-gold);">${window.formatCurrency(price * (item.quantity||1))}</div>
+          </div>
+        `;
+      }).join('');
+
+      if (cart.length === 0) {
+        document.getElementById('checkout-items').innerHTML = `<div style="text-align:center;color:var(--color-text-muted);padding:10px;">Cart is empty</div>`;
+      } else {
+        document.getElementById('checkout-items').innerHTML = itemsHtml;
+      }
+
+      const delivery = (subtotal >= 5000 || subtotal === 0) ? 0 : 350;
+      window.lastCalculatedTotals = { subtotal, delivery, total: subtotal + delivery };
+      
+      document.getElementById('co-subtotal').textContent = window.formatCurrency(subtotal);
+      document.getElementById('co-delivery').textContent = delivery === 0 ? 'FREE' : window.formatCurrency(delivery);
+      document.getElementById('co-total').textContent    = window.formatCurrency(subtotal + delivery);
+      lucide.createIcons();
+    }
+
+    loadCheckoutSummary();
+
+    // Step navigation
+    window.goToStep = (step) => {
+      if (step === 2) {
+        const fn = document.getElementById('first-name').value.trim();
+        const ln = document.getElementById('last-name').value.trim();
+        const ph = document.getElementById('phone').value.trim();
+        const ad = document.getElementById('address1').value.trim();
+        const ct = document.getElementById('city').value.trim();
+        const dt = document.getElementById('district').value;
+        if (!fn || !ln || !ph || !ad || !ct || !dt) {
+          showToast('Please fill all required delivery fields.', 'error');
+          return;
+        }
+      }
+      if (step === 3) {
+        // Fill confirm step
+        const address = `${document.getElementById('first-name').value} ${document.getElementById('last-name').value}<br>${document.getElementById('address1').value}, ${document.getElementById('address2').value ? document.getElementById('address2').value+', ' : ''}${document.getElementById('city').value}, ${document.getElementById('district').value}`;
+        document.getElementById('confirm-address').innerHTML = address;
+        document.getElementById('confirm-payment').textContent = selectedPayment === 'card' ? '💳 Credit/Debit Card' : (selectedPayment === 'paypal' ? '🅿️ PayPal' : '💵 Cash on Delivery');
+        loadCheckoutSummary();
+      }
+
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`step-${step}`).classList.add('active');
+
+      // Update step indicators
+      for (let i = 1; i <= 3; i++) {
+        const ind = document.getElementById(`step-indicator-${i}`);
+        ind.className = 'checkout-step';
+        if (i < step)  ind.className += ' done';
+        if (i === step) ind.className += ' active';
+      }
+
+      currentStep = step;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.selectPayment = (method) => {
+      selectedPayment = method;
+      document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById(`method-${method}`).classList.add('selected');
+      document.getElementById('card-details').style.display = method === 'card' ? 'block' : 'none';
+    };
+
+    window.placeOrder = async () => {
+      const btn = document.getElementById('place-order-btn');
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+
+      try {
+        const orderData = {
+          items: getLocalCart(),
+          shippingAddress: {
+            firstName: document.getElementById('first-name').value.trim(),
+            lastName: document.getElementById('last-name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            address1: document.getElementById('address1').value.trim(),
+            address2: document.getElementById('address2').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            district: document.getElementById('district').value,
+          },
+          paymentMethod: selectedPayment,
+          subtotal: window.lastCalculatedTotals.subtotal,
+          deliveryFee: window.lastCalculatedTotals.delivery,
+          total: window.lastCalculatedTotals.total
+        };
+
+        const result = await createOrder(orderData);
+        if (!result.success) throw new Error(result.error);
+
+        document.getElementById('success-order-id').textContent = `#${result.orderId}`;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('step-success').classList.add('active');
+        
+        // Hide order summary
+        document.querySelector('.order-summary-card').style.display = 'none';
+        lucide.createIcons();
+      } catch (err) {
+        showToast(err.message || 'Failed to place order. Please try again.', 'error');
+      } finally {
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+      }
+    };
+
+    // Card formatting
+    window.formatCardNumber = (input) => {
+      let val = input.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+      let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+      input.value = formatted;
+    };
+
+    window.formatExpiry = (input) => {
+      let val = input.value.replace(/\D/g, '');
+      if (val.length >= 2) val = val.slice(0,2) + '/' + val.slice(2,4);
+      input.value = val;
+    };
+  </script>
+
+  <script src="../js/app.js" type="module"></script>
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+  </script>
+</body>
+</html>

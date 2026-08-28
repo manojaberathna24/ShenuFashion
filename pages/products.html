@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Products — Shenu Fashion Store</title>
+  <meta name="description" content="Browse our complete collection of fashion products. Filter by category, price, size, and color to find your perfect style." />
+
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <!-- ============================================================ NAVBAR ============================================================ -->
+  <nav class="navbar scrolled" id="main-navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">S</div>
+        <div class="navbar-logo-text">SHENU <span>FASHION</span></div>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="products.html" class="nav-link active">Products</a></li>
+        <li><a href="products.html?cat=women" class="nav-link">Women</a></li>
+        <li><a href="products.html?cat=men" class="nav-link">Men</a></li>
+        <li><a href="products.html?cat=accessories" class="nav-link">Accessories</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <div class="search-bar" style="width:220px;">
+          <i data-lucide="search" width="14" height="14" class="search-icon"></i>
+          <input type="text" id="product-search" placeholder="Search products..." />
+        </div>
+        <a href="wishlist.html" class="navbar-icon-btn" data-auth="logged-in" style="display:none">
+          <i data-lucide="heart" width="18" height="18"></i>
+        </a>
+        <a href="cart.html" class="navbar-icon-btn">
+          <i data-lucide="shopping-bag" width="18" height="18"></i>
+          <span class="badge-count" id="cart-count-badge" style="display:none">0</span>
+        </a>
+        <div data-auth="logged-out">
+          <a href="login.html" class="btn btn-primary btn-sm">Sign In</a>
+        </div>
+        <div class="user-dropdown" data-auth="logged-in" style="display:none">
+          <button class="flex items-center gap-2" id="user-menu-btn" style="background:none;border:none;cursor:pointer">
+            <div id="navbar-initials" class="navbar-avatar flex items-center justify-content:center font-bold text-sm"
+                 style="background:var(--gradient-gold); color:#0F0F1A; font-family:var(--font-heading); display:none;"></div>
+            <img src="" alt="" class="navbar-avatar" id="navbar-avatar" />
+          </button>
+          <div class="dropdown-menu" id="user-dropdown">
+            <div class="dropdown-header">
+              <div class="user-name" id="dropdown-name"></div>
+              <div class="user-email" id="dropdown-email"></div>
+            </div>
+            <a href="profile.html" class="dropdown-item"><i data-lucide="user" width="16" height="16"></i> My Profile</a>
+            <a href="orders.html" class="dropdown-item"><i data-lucide="package" width="16" height="16"></i> My Orders</a>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" id="logout-btn"><i data-lucide="log-out" width="16" height="16"></i> Sign Out</button>
+          </div>
+        </div>
+        <button class="navbar-toggle" id="nav-toggle"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================ PRODUCTS PAGE ============================================================ -->
+  <main class="products-page">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" style="margin-bottom:var(--space-5);">
+        <div class="breadcrumb-item"><a href="../index.html">Home</a></div>
+        <div class="breadcrumb-separator"><i data-lucide="chevron-right" width="14" height="14"></i></div>
+        <div class="breadcrumb-item current" id="breadcrumb-current">All Products</div>
+      </nav>
+
+      <!-- Header -->
+      <div class="products-header">
+        <div>
+          <h1 class="heading-2" id="page-title">All Products</h1>
+          <div class="products-count" id="products-count">Loading...</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--space-3);">
+          <!-- Sort -->
+          <select class="form-control" id="sort-select" style="width:200px; padding:8px 12px;">
+            <option value="createdAt-desc">Newest First</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating-desc">Highest Rated</option>
+          </select>
+          <!-- View toggle -->
+          <div style="display:flex; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden;">
+            <button id="grid-view-btn" title="Grid view" style="padding:8px 10px; background:var(--color-gold); border:none; color:#0F0F1A; cursor:pointer;">
+              <i data-lucide="grid-3x3" width="16" height="16"></i>
+            </button>
+            <button id="list-view-btn" title="List view" style="padding:8px 10px; background:transparent; border:none; color:var(--color-text-muted); cursor:pointer; transition:all 0.3s;">
+              <i data-lucide="list" width="16" height="16"></i>
+            </button>
+          </div>
+          <!-- Mobile filter toggle -->
+          <button id="mobile-filter-btn" class="btn btn-ghost btn-sm" style="display:none;">
+            <i data-lucide="sliders-horizontal" width="16" height="16"></i>
+            Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filters -->
+      <div id="active-filters" class="filter-chips" style="margin-bottom:var(--space-4); display:none;"></div>
+
+      <!-- Layout -->
+      <div class="products-layout">
+
+        <!-- ========== SIDEBAR FILTERS ========== -->
+        <aside class="filters-sidebar" id="filters-sidebar">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-5);">
+            <h2 style="font-family:var(--font-heading); font-size:var(--text-base); font-weight:var(--weight-bold);">Filters</h2>
+            <button class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear All</button>
+          </div>
+
+          <!-- Category -->
+          <div class="filter-section">
+            <div class="filter-title">Category</div>
+            <div style="display:flex; flex-direction:column; gap:6px;" id="category-filters">
+              <label class="form-check"><input type="radio" name="category" value="" checked onchange="applyFilters()"> <span class="form-check-label">All Categories</span></label>
+              <label class="form-check"><input type="radio" name="category" value="women" onchange="applyFilters()"> <span class="form-check-label">Women (142)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="men" onchange="applyFilters()"> <span class="form-check-label">Men (98)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="dresses" onchange="applyFilters()"> <span class="form-check-label">Dresses (76)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="accessories" onchange="applyFilters()"> <span class="form-check-label">Accessories (54)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="shoes" onchange="applyFilters()"> <span class="form-check-label">Shoes (67)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="bags" onchange="applyFilters()"> <span class="form-check-label">Bags (43)</span></label>
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div class="filter-section">
+            <div class="filter-title">Price Range (LKR)</div>
+            <div class="price-range-inputs">
+              <input type="number" id="min-price" placeholder="Min" min="0" onchange="applyFilters()" />
+              <span style="color:var(--color-text-faint);">—</span>
+              <input type="number" id="max-price" placeholder="Max" onchange="applyFilters()" />
+            </div>
+          </div>
+
+          <!-- Sizes -->
+          <div class="filter-section">
+            <div class="filter-title">Size</div>
+            <div class="size-grid">
+              <button class="size-btn" data-size="XS" onclick="toggleSize(this)">XS</button>
+              <button class="size-btn" data-size="S"  onclick="toggleSize(this)">S</button>
+              <button class="size-btn" data-size="M"  onclick="toggleSize(this)">M</button>
+              <button class="size-btn" data-size="L"  onclick="toggleSize(this)">L</button>
+              <button class="size-btn" data-size="XL" onclick="toggleSize(this)">XL</button>
+              <button class="size-btn" data-size="XXL" onclick="toggleSize(this)">2XL</button>
+              <button class="size-btn" data-size="36" onclick="toggleSize(this)">36</button>
+              <button class="size-btn" data-size="38" onclick="toggleSize(this)">38</button>
+              <button class="size-btn" data-size="40" onclick="toggleSize(this)">40</button>
+              <button class="size-btn" data-size="42" onclick="toggleSize(this)">42</button>
+            </div>
+          </div>
+
+          <!-- Colors -->
+          <div class="filter-section">
+            <div class="filter-title">Color</div>
+            <div class="color-picker" id="color-picker">
+              <div class="color-dot" data-color="Black"  title="Black"  style="background:#1a1a1a; border-color:#1a1a1a;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="White"  title="White"  style="background:#f0f0f0; border-color:#ccc;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Red"    title="Red"    style="background:#E94560;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Blue"   title="Blue"   style="background:#3B82F6;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Green"  title="Green"  style="background:#4CAF6E;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Gold"   title="Gold"   style="background:#C9A96E;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Pink"   title="Pink"   style="background:#F472B6;" onclick="toggleColor(this)"></div>
+              <div class="color-dot" data-color="Navy"   title="Navy"   style="background:#1E3A5F;" onclick="toggleColor(this)"></div>
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div class="filter-section">
+            <div class="filter-title">Availability</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <label class="form-check"><input type="checkbox" id="filter-new" onchange="applyFilters()"> <span class="form-check-label">New Arrivals</span></label>
+              <label class="form-check"><input type="checkbox" id="filter-sale" onchange="applyFilters()"> <span class="form-check-label">On Sale</span></label>
+              <label class="form-check"><input type="checkbox" id="filter-instock" onchange="applyFilters()"> <span class="form-check-label">In Stock Only</span></label>
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <div class="filter-section">
+            <div class="filter-title">Minimum Rating</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <label class="form-check"><input type="radio" name="rating" value="" checked onchange="applyFilters()"> <span class="form-check-label">Any Rating</span></label>
+              <label class="form-check"><input type="radio" name="rating" value="4" onchange="applyFilters()"> <span class="form-check-label">★★★★ & above</span></label>
+              <label class="form-check"><input type="radio" name="rating" value="3" onchange="applyFilters()"> <span class="form-check-label">★★★ & above</span></label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- ========== PRODUCTS GRID ========== -->
+        <div>
+          <!-- Products Grid -->
+          <div class="products-grid" id="products-grid">
+            <!-- Skeleton loaders -->
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-state" id="empty-state" style="display:none;">
+            <div class="empty-state-icon">
+              <i data-lucide="search-x" width="36" height="36"></i>
+            </div>
+            <div class="empty-state-title">No Products Found</div>
+            <div class="empty-state-description">Try adjusting your filters or search for something else.</div>
+            <button class="btn btn-outline" onclick="clearAllFilters()">
+              <i data-lucide="refresh-cw" width="16" height="16"></i>
+              Clear Filters
+            </button>
+          </div>
+
+          <!-- Load more -->
+          <div style="text-align:center; margin-top:var(--space-8);" id="load-more-wrapper" style="display:none;">
+            <button class="btn btn-outline btn-lg" id="load-more-btn">
+              <i data-lucide="chevrons-down" width="18" height="18"></i>
+              Load More Products
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================ SCRIPTS ============================================================ -->
+  <script src="../js/app.js" type="module"></script>
+  <script type="module">
+    import { getProducts, renderProductCard, renderProductSkeletons } from '../js/products.js';
+    import { addToCart, toggleWishlist } from '../js/cart.js';
+    import { logoutUser } from '../js/auth.js';
+
+    lucide.createIcons();
+
+    // State
+    let currentFilters = { category: '', search: '', minPrice: null, maxPrice: null, sizes: [], colors: [], isNew: false, onSale: false };
+    let currentSort = 'createdAt-desc';
+    let lastDoc = null;
+    let totalProducts = 0;
+    let selectedSizes = [];
+    let selectedColors = [];
+
+    // Parse URL params on load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('cat'))    { currentFilters.category = urlParams.get('cat'); document.querySelector(`input[name="category"][value="${currentFilters.category}"]`)?.click(); }
+    if (urlParams.get('search')) { currentFilters.search = urlParams.get('search'); document.getElementById('product-search').value = currentFilters.search; }
+    if (urlParams.get('new'))    { currentFilters.isNew = true; document.getElementById('filter-new').checked = true; }
+    if (urlParams.get('sale'))   { currentFilters.onSale = true; document.getElementById('filter-sale').checked = true; }
+
+    // Update page title & breadcrumb
+    function updatePageTitle() {
+      const labels = { women:'Women', men:'Men', dresses:'Dresses', accessories:'Accessories', shoes:'Shoes', bags:'Bags' };
+      const label = labels[currentFilters.category] || (currentFilters.search ? `"${currentFilters.search}"` : 'All Products');
+      document.getElementById('page-title').textContent = label;
+      document.getElementById('breadcrumb-current').textContent = label;
+      document.title = `${label} — Shenu Fashion Store`;
+    }
+
+    // Load products
+    async function loadProducts(append = false) {
+      const grid = document.getElementById('products-grid');
+      const [sortBy, sortDir] = currentSort.split('-');
+
+      if (!append) {
+        grid.innerHTML = renderProductSkeletons(8);
+        lucide.createIcons();
+        lastDoc = null;
+      }
+
+      const result = await getProducts({
+        category: currentFilters.category || null,
+        search: currentFilters.search || null,
+        minPrice: currentFilters.minPrice,
+        maxPrice: currentFilters.maxPrice,
+        sizes: selectedSizes,
+        colors: selectedColors,
+        sortBy, sortDir,
+        isNew: currentFilters.isNew,
+        onSale: currentFilters.onSale,
+        pageSize: 12,
+        afterDoc: append ? lastDoc : null,
+      });
+
+      lastDoc = result.lastDoc;
+      const products = result.products;
+
+      if (!append) {
+        if (products.length === 0) {
+          // Show demo products if Firestore empty or not configured
+          grid.innerHTML = getDemoProducts();
+          document.getElementById('products-count').textContent = '6 products found';
+          const loadMoreWrapper = document.getElementById('load-more-wrapper');
+          if (loadMoreWrapper) loadMoreWrapper.style.display = 'none';
+        } else {
+          grid.innerHTML = products.map(renderProductCard).join('');
+          document.getElementById('products-count').textContent = `${products.length} products found`;
+        }
+      } else {
+        if (products.length > 0) {
+          grid.insertAdjacentHTML('beforeend', products.map(renderProductCard).join(''));
+        }
+      }
+
+      document.getElementById('load-more-wrapper').style.display = result.hasMore ? 'block' : 'none';
+      lucide.createIcons();
+    }
+
+    function getDemoProducts() {
+      const demos = [
+        { id:'d1', name:'Floral Summer Dress', category:'Women', price:4500, salePrice:3200, rating:4.5, reviewCount:24, isNew:true, img:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80' },
+        { id:'d2', name:'Classic Oxford Shirt', category:'Men', price:3800, rating:4.2, reviewCount:18, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80' },
+        { id:'d3', name:'Leather Crossbody Bag', category:'Bags', price:8900, salePrice:6500, rating:4.8, reviewCount:36, img:'https://images.unsplash.com/photo-1550614000-4b95dd247545?auto=format&fit=crop&w=600&q=80' },
+        { id:'d4', name:'Silk Evening Blouse', category:'Women', price:5200, rating:4.3, reviewCount:12, isNew:true, img:'https://images.unsplash.com/photo-1434389670869-c44943f2d7ac?auto=format&fit=crop&w=600&q=80' },
+        { id:'d5', name:'High Heels Sandals', category:'Shoes', price:5200, rating:4.1, reviewCount:10, img:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=600&q=80' },
+        { id:'d6', name:'Gold Chain Necklace', category:'Accessories', price:1800, rating:4.6, reviewCount:44, img:'https://images.unsplash.com/photo-1599643478514-4a820c5678eb?auto=format&fit=crop&w=600&q=80' }
+      ];
+
+      return demos.map(p => `
+        <div class="product-card" style="animation: scaleIn 0.5s ease backwards;">
+          <div class="product-card-image">
+            <img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" />
+            <div class="product-card-badges">
+              ${p.isNew ? '<span class="badge badge-gold">New</span>' : ''}
+              ${p.salePrice ? `<span class="badge badge-accent">-${Math.round((1 - p.salePrice/p.price)*100)}%</span>` : ''}
+            </div>
+            <div class="product-card-actions">
+              <button class="product-action-btn" onclick="toggleWishlist('${p.id}', this)"><i data-lucide="heart" width="16" height="16"></i></button>
+            </div>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-category">${p.category}</div>
+            <div class="product-card-name">${p.name}</div>
+            <div class="product-card-rating">
+              <span style="color:var(--color-gold);">★</span> ${p.rating} <span class="rating-count">(${p.reviewCount})</span>
+            </div>
+            <div class="product-card-price">
+              <span class="price-current">LKR ${(p.salePrice || p.price).toLocaleString()}</span>
+              ${p.salePrice ? `<span class="price-original">LKR ${p.price.toLocaleString()}</span>` : ''}
+            </div>
+          </div>
+          <div class="product-card-footer">
+            <button class="btn-add-cart" onclick="event.stopPropagation(); cartAction('${p.id}')">
+              <i data-lucide="shopping-cart" width="15" height="15"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter functions
+    window.applyFilters = window.debounce(() => {
+      currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || '';
+      currentFilters.minPrice = parseFloat(document.getElementById('min-price').value) || null;
+      currentFilters.maxPrice = parseFloat(document.getElementById('max-price').value) || null;
+      currentFilters.isNew    = document.getElementById('filter-new').checked;
+      currentFilters.onSale   = document.getElementById('filter-sale').checked;
+      updatePageTitle();
+      updateActiveFilters();
+      loadProducts(false);
+    }, 400);
+
+    window.toggleSize = (btn) => {
+      btn.classList.toggle('active');
+      const size = btn.dataset.size;
+      selectedSizes = selectedSizes.includes(size)
+        ? selectedSizes.filter(s => s !== size)
+        : [...selectedSizes, size];
+      applyFilters();
+    };
+
+    window.toggleColor = (dot) => {
+      dot.classList.toggle('active');
+      const color = dot.dataset.color;
+      selectedColors = selectedColors.includes(color)
+        ? selectedColors.filter(c => c !== color)
+        : [...selectedColors, color];
+      applyFilters();
+    };
+
+    window.clearAllFilters = () => {
+      document.querySelectorAll('input[name="category"]')[0].checked = true;
+      document.getElementById('min-price').value = '';
+      document.getElementById('max-price').value = '';
+      document.getElementById('filter-new').checked = false;
+      document.getElementById('filter-sale').checked = false;
+      document.getElementById('filter-instock').checked = false;
+      document.querySelectorAll('input[name="rating"]')[0].checked = true;
+      document.querySelectorAll('.size-btn.active').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.color-dot.active').forEach(d => d.classList.remove('active'));
+      selectedSizes = []; selectedColors = [];
+      currentFilters = { category:'', search:'', minPrice:null, maxPrice:null, sizes:[], colors:[], isNew:false, onSale:false };
+      updateActiveFilters();
+      loadProducts(false);
+    };
+
+    function updateActiveFilters() {
+      const container = document.getElementById('active-filters');
+      const chips = [];
+      if (currentFilters.category) chips.push(`Category: ${currentFilters.category}`);
+      if (currentFilters.minPrice) chips.push(`Min: LKR ${currentFilters.minPrice}`);
+      if (currentFilters.maxPrice) chips.push(`Max: LKR ${currentFilters.maxPrice}`);
+      if (currentFilters.isNew)    chips.push('New Arrivals');
+      if (currentFilters.onSale)   chips.push('On Sale');
+      selectedSizes.forEach(s  => chips.push(`Size: ${s}`));
+      selectedColors.forEach(c => chips.push(`Color: ${c}`));
+
+      container.style.display = chips.length ? 'flex' : 'none';
+      container.innerHTML = chips.map(c => `<div class="chip active">${c} <span onclick="clearAllFilters()" style="cursor:pointer; margin-left:4px;">×</span></div>`).join('');
+    }
+
+    // Search
+    document.getElementById('product-search')?.addEventListener('input', window.debounce((e) => {
+      currentFilters.search = e.target.value;
+      loadProducts(false);
+    }, 500));
+
+    // Sort
+    document.getElementById('sort-select')?.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      loadProducts(false);
+    });
+
+    // Load more
+    document.getElementById('load-more-btn')?.addEventListener('click', () => loadProducts(true));
+
+    // Cart & Wishlist actions
+    window.cartAction = (id) => {
+      const cart = JSON.parse(localStorage.getItem('shenu_cart') || '[]');
+      const ex = cart.find(i => i.productId === id);
+      ex ? ex.quantity++ : cart.push({ productId: id, quantity: 1 });
+      localStorage.setItem('shenu_cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cart-updated'));
+      showToast('Added to cart! 🛒', 'success', 'Cart');
+    };
+
+    window.wishlistAction = (id) => {
+      if (!window.currentUser) { showToast('Please sign in to save to wishlist.', 'warning'); return; }
+      showToast('Added to wishlist! ❤️', 'success', 'Wishlist');
+    };
+
+    // View toggle
+    document.getElementById('grid-view-btn')?.addEventListener('click', () => {
+      document.getElementById('products-grid').className = 'products-grid';
+      document.getElementById('grid-view-btn').style.background = 'var(--color-gold)';
+      document.getElementById('grid-view-btn').style.color = '#0F0F1A';
+      document.getElementById('list-view-btn').style.background = 'transparent';
+      document.getElementById('list-view-btn').style.color = 'var(--color-text-muted)';
+    });
+
+    document.getElementById('list-view-btn')?.addEventListener('click', () => {
+      document.getElementById('products-grid').style.gridTemplateColumns = '1fr';
+      document.getElementById('list-view-btn').style.background = 'var(--color-gold)';
+      document.getElementById('list-view-btn').style.color = '#0F0F1A';
+      document.getElementById('grid-view-btn').style.background = 'transparent';
+      document.getElementById('grid-view-btn').style.color = 'var(--color-text-muted)';
+    });
+
+    // Logout
+    document.getElementById('logout-btn')?.addEventListener('click', () => logoutUser());
+
+    // Initial load
+    updatePageTitle();
+    loadProducts(false);
+  </script>
+
+  <script src="../js/app.js" type="module"></script>
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+  </script>
+</body>
+</html>

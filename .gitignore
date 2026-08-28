@@ -1,0 +1,7 @@
+node_modules/
+screenshots-temp/node_modules/
+.system_generated/
+.gemini/
+*.log
+.DS_Store
+Thumbs.db
