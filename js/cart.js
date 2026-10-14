@@ -222,7 +222,7 @@ export function renderCartItem(item, product) {
     <div class="cart-item" data-product-id="${item.productId}" data-size="${item.size || ''}" data-color="${item.color || ''}">
       <div class="cart-item-image" style="background:var(--color-surface-2); display:flex; align-items:center; justify-content:center; border-radius:var(--radius-lg);">
         ${product.images?.[0]
-          ? `<img src="${product.images[0]}" alt="${product.name}" class="cart-item-image" style="width:100px;height:130px;object-fit:cover;border-radius:var(--radius-lg);" />`
+          ? `<img src="${(product.images && product.images[0] && !product.images[0].startsWith('http') && !product.images[0].startsWith('../')) ? '../' + product.images[0].replace(/^\/+/, '') : (product.images ? product.images[0] : '../images/products/dress_1.jpg')}" alt="${product.name}" class="cart-item-image" style="width:100px;height:130px;object-fit:cover;border-radius:var(--radius-lg);" />`
           : `<i data-lucide="image" width="32" height="32" style="color:var(--color-text-faint);"></i>`
         }
       </div>

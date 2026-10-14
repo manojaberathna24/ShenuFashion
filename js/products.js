@@ -3991,13 +3991,23 @@ export const DEMO_PRODUCTS = [
 let lastDoc = null;
 let allProductsCache = null;
 
-export function getRealFashionImage(product, index = 0) {
-  if (!product) return 'images/products/dress_1.jpg';
-  if (product.images && product.images.length > 0 && product.images[0]) {
-    return product.images[0];
+export export function getRealFashionImage(product, index = 0) {
+  const isPagesDir = typeof window !== 'undefined' && window.location && window.location.pathname.includes('/pages/');
+  const prefix = isPagesDir ? '../' : '';
+
+  let img = 'images/products/dress_1.jpg';
+  if (product && product.images && product.images.length > 0 && product.images[0]) {
+    img = product.images[0];
+  } else if (product && product.img) {
+    img = product.img;
   }
-  if (product.img) return product.img;
-  return 'images/products/dress_1.jpg';
+
+  img = img.replace(/^\/+/, '');
+  if (img.startsWith('../')) {
+    img = img.replace(/^\.\.\//, '');
+  }
+
+  return prefix + img;
 }
 
 // ============================================================
@@ -4353,7 +4363,7 @@ export function renderProductCard(product, index = 0) {
   return `
     <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'" data-product-id="${product.id}">
       <div class="product-card-image">
-        <img src="${realImg}" alt="${product.name || 'Fashion Apparel'}" loading="lazy" onerror="this.onerror=null; this.src='images/products/dress_1.jpg';" style="width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform 0.6s ease;" />
+        <img src="${realImg}" alt="${product.name || 'Fashion Apparel'}" loading="lazy" onerror="this.onerror=null; this.src=window.location.pathname.includes('/pages/') ? '../images/products/dress_1.jpg' : 'images/products/dress_1.jpg';" style="width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform 0.6s ease;" />
         <div class="product-card-badges">
           ${product.isNew ? '<span class="badge badge-gold">New</span>' : ''}
           ${product.onSale || discount > 0 ? `<span class="badge badge-accent">-${discount > 0 ? discount : 20}%</span>` : ''}
