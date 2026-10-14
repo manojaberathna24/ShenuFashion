@@ -31,7 +31,7 @@
     const link = document.createElement('link');
     link.id = 'shenu-chatbot-css';
     link.rel = 'stylesheet';
-    link.href = `${basePath}/css/chatbot.css?v=100`;
+    link.href = `${basePath}/css/chatbot.css?v=110`;
     document.head.appendChild(link);
   }
 
@@ -4255,8 +4255,9 @@
         <!-- Input Bar -->
         <div class="chat-input-bar">
           <input type="text" id="shenu-chat-input" placeholder="Type your question (e.g. 5000 t adum, track 4355)..." />
-          <button class="chat-send-btn" id="shenu-chat-send" title="Send Message">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          <button class="chat-send-btn" id="shenu-chat-send" title="Send Message" aria-label="Send Message">
+            <span>Send</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
       `;
@@ -4632,7 +4633,7 @@
           if (isPagesDir && !imgUrl.startsWith('..')) imgUrl = `${basePath}/${imgUrl}`;
 
           return `
-            <div class="chat-product-card">
+            <div class="chat-product-card" onclick="window.location.href='${productDetailPath}?id=${p.id}'" style="cursor:pointer;" title="Click to view details">
               <img src="${imgUrl}" alt="${p.name}" class="chat-product-img" onerror="this.src='https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=200'" />
               <div class="chat-product-info">
                 <div>
@@ -4645,8 +4646,8 @@
                     ${origPrice ? `<span class="chat-product-price-orig">Rs. ${origPrice.toLocaleString()}</span>` : ''}
                   </div>
                   <div class="chat-product-actions">
-                    <a href="${productDetailPath}?id=${p.id}" class="chat-btn-view">View Details</a>
-                    <button type="button" class="chat-btn-cart" onclick="window.chatbotAddToCart('${p.id}', this)">🛒 Add to Cart</button>
+                    <a href="${productDetailPath}?id=${p.id}" class="chat-btn-view" onclick="event.stopPropagation()">View Details</a>
+                    <button type="button" class="chat-btn-cart" onclick="event.stopPropagation(); window.chatbotAddToCart('${p.id}', this)">Add to Cart</button>
                   </div>
                 </div>
               </div>

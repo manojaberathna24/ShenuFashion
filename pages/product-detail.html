@@ -37,7 +37,7 @@
       } catch(e) { console.error('Theme toggle error:', e); }
     };
   </script>
-  <link rel="stylesheet" href="../css/chatbot.css?v=100" />
+  <link rel="stylesheet" href="../css/chatbot.css?v=110" />
 </head>
 <body>
 
@@ -148,13 +148,17 @@
 
           </div>
 
-          <!-- Actions -->
-          <div style="display:flex; gap:16px; margin-top:var(--space-4);">
-            <button class="btn btn-primary btn-lg" id="add-to-cart-btn" style="flex:1; height:56px;" onclick="addDetailToCart()">
+                    <!-- Actions -->
+          <div style="display:flex; gap:12px; margin-top:var(--space-4); flex-wrap:wrap;">
+            <button class="btn btn-primary btn-lg" id="add-to-cart-btn" style="flex:1; min-width:180px; height:56px; font-weight:700;" onclick="addDetailToCart()">
               <i data-lucide="shopping-cart" width="20" height="20"></i>
               Add to Cart
             </button>
-            <button class="btn btn-outline btn-lg" style="width:56px; height:56px; padding:0; flex-shrink:0;">
+            <button class="btn btn-lg" id="buy-now-btn" style="flex:1; min-width:180px; height:56px; font-weight:700; background:linear-gradient(135deg, #10B981 0%, #059669 100%); color:#FFFFFF; border:none; box-shadow:0 4px 16px rgba(16,185,129,0.35); transition:all 0.2s ease;" onclick="buyDetailNow()">
+              <i data-lucide="zap" width="20" height="20"></i>
+              Buy Now
+            </button>
+            <button class="btn btn-outline btn-lg" style="width:56px; height:56px; padding:0; flex-shrink:0;" title="Save to Wishlist" onclick="window.showToast && window.showToast('Added to Wishlist!', 'success')">
               <i data-lucide="heart" width="22" height="22"></i>
             </button>
           </div>
@@ -546,7 +550,7 @@
     init();
   </script>
   <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
-  <script src="../js/chatbot.js?v=100" type="module"></script>
+  <script src="../js/chatbot.js?v=110" type="module"></script>
       <!-- Floating AI Chatbot Button with Character Avatar -->
   <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
     <img src="../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
