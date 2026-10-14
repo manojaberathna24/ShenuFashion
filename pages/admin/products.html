@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Products — Shenu Admin</title>
-  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/main.css?v=25" />
   <link rel="stylesheet" href="../../css/components.css" />
   <link rel="stylesheet" href="../../css/pages.css?v=3" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -54,6 +54,34 @@
       font-size: 12px;
     }
   </style>
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../../css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -93,10 +121,17 @@
       <!-- Topbar -->
       <div class="admin-topbar">
         <h1 class="admin-page-title">Manage Products</h1>
-        <button class="btn btn-primary" onclick="openProductModal()">
+                <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Light / Dark Mode Toggle -->
+          <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="cursor:pointer; background:var(--color-surface); border:1px solid var(--color-border); width:40px; height:40px; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+            <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+          </button>
+          <button class="btn btn-primary" onclick="openProductModal()">
           <i data-lucide="plus" width="18" height="18"></i>
           Add Product
-        </button>
+          </button>
+        </div>
       </div>
 
       <!-- Search & Filter -->
@@ -339,8 +374,8 @@
               </td>
               <td><span class="badge badge-gold">${p.category}</span></td>
               <td>
-                <div style="font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">LKR ${(p.salePrice || p.price).toLocaleString()}</div>
-                ${p.salePrice ? `<div style="font-size:var(--text-xs); text-decoration:line-through; color:var(--color-text-faint);">LKR ${p.price.toLocaleString()}</div>` : ''}
+                <div style="font-weight:600; color:var(--color-gold); font-family:var(--font-heading);">Rs. ${(p.salePrice || p.price).toLocaleString()}</div>
+                ${p.salePrice ? `<div style="font-size:var(--text-xs); text-decoration:line-through; color:var(--color-text-faint);">Rs. ${p.price.toLocaleString()}</div>` : ''}
               </td>
               <td>
                 <span style="font-weight:600; color:${p.stock === 0 ? 'var(--color-error)' : p.stock <= 5 ? 'var(--color-warning)' : 'var(--color-success)'};">
@@ -535,7 +570,18 @@
     loadProducts();
   </script>
 
-  <script src="../../js/app.js" type="module"></script>
+  <script src="../../js/app.js?v=25" type="module"></script>
   <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+  <!-- Shenu AI Chatbot Assistant -->
+  <script src="../../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

@@ -6,11 +6,42 @@
   <title>My Orders — Shenu Fashion Store</title>
   <meta name="description" content="Track and manage your orders at Shenu Fashion Store." />
 
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=25" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- PDF Generation Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -27,8 +58,14 @@
         <li><a href="../index.html" class="nav-link">Home</a></li>
         <li><a href="products.html" class="nav-link">Products</a></li>
         <li><a href="orders.html" class="nav-link active">My Orders</a></li>
+        <li><a href="track-order.html" class="nav-link">Track Order</a></li>
       </ul>
       <div class="navbar-actions">
+        <!-- Light / Dark Mode Toggle -->
+        <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+          <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+        </button>
         <a href="cart.html" class="navbar-icon-btn">
           <i data-lucide="shopping-bag" width="18" height="18"></i>
           <span class="badge-count" id="cart-count-badge" style="display:none">0</span>
@@ -116,15 +153,27 @@
         <!-- Order totals -->
         <div id="modal-totals" style="margin-top:16px;"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="cancel-order-btn" onclick="cancelOrderAction()">Cancel Order</button>
-        <a href="products.html" class="btn btn-primary">Continue Shopping</a>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div>
+          <button class="btn btn-ghost" id="cancel-order-btn" onclick="cancelOrderAction()">Cancel Order</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" id="modal-download-invoice-btn" onclick="downloadModalOrderInvoice()" style="gap:6px;">
+            <i data-lucide="download" width="16" height="16"></i>
+            Invoice (PDF)
+          </button>
+          <button class="btn btn-primary" id="modal-track-btn" onclick="trackModalOrder()" style="gap:6px;">
+            <i data-lucide="map-pin" width="16" height="16"></i>
+            Track Parcel
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
   <script type="module">
     import { getUserOrders, cancelOrder, ORDER_STATUSES, renderOrderTimeline } from '../js/orders.js';
+    import { generateInvoicePDF } from '../js/invoice.js';
     import { logoutUser } from '../js/auth.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { auth } from '../js/firebase-config.js';
@@ -223,9 +272,25 @@
     };
 
     // Modal
+    
+    let currentSelectedOrder = null;
+
+    window.downloadModalOrderInvoice = () => {
+      if (currentSelectedOrder) {
+        generateInvoicePDF(currentSelectedOrder);
+      }
+    };
+
+    window.trackModalOrder = () => {
+      if (currentSelectedOrder) {
+        window.location.href = `track-order.html?orderId=${currentSelectedOrder.id}`;
+      }
+    };
+
     window.openOrderModal = (orderId) => {
       const order = allOrders.find(o => o.id === orderId) || demoOrders.find(o => o.id === orderId);
       if (!order) return;
+      currentSelectedOrder = order;
 
       document.getElementById('modal-order-id').textContent = `Order #${order.id}`;
       document.getElementById('modal-timeline').innerHTML = renderOrderTimeline(order);
@@ -284,7 +349,18 @@
     document.getElementById('logout-btn')?.addEventListener('click', () => logoutUser());
   </script>
 
-  <script src="../js/app.js" type="module"></script>
+  <script src="../js/app.js?v=25" type="module"></script>
   <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+  <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
+  <script src="../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

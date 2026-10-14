@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Management — Shenu Fashion Store Admin</title>
+  <meta name="description" content="Manage registered customers and guest buyers in Shenu Fashion Store admin panel." />
+
+  <link rel="stylesheet" href="../../css/main.css?v=25" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/pages.css?v=4" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../../css/chatbot.css?v=100" />
+</head>
+<body>
+
+  <div id="toast-container"></div>
+
+  <div class="admin-layout">
+
+    <!-- ============================================================ SIDEBAR ============================================================ -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-logo">
+        <a href="../../index.html" class="navbar-logo">
+          <div class="navbar-logo-icon">S</div>
+          <div class="navbar-logo-text">SHENU <span>ADMIN</span></div>
+        </a>
+      </div>
+
+      <nav class="admin-nav">
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Overview</div>
+          <a href="dashboard.html" class="admin-nav-item">
+            <i data-lucide="layout-dashboard" width="18" height="18"></i>
+            Dashboard
+          </a>
+          <a href="#" class="admin-nav-item">
+            <i data-lucide="bar-chart-3" width="18" height="18"></i>
+            Analytics
+            <span class="badge badge-gold" style="margin-left:auto; font-size:9px;">Soon</span>
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Store</div>
+          <a href="products.html" class="admin-nav-item">
+            <i data-lucide="shirt" width="18" height="18"></i>
+            Products
+          </a>
+          <a href="orders.html" class="admin-nav-item">
+            <i data-lucide="package" width="18" height="18"></i>
+            Orders
+          </a>
+          <a href="#" class="admin-nav-item">
+            <i data-lucide="tag" width="18" height="18"></i>
+            Categories
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Users</div>
+          <a href="users.html" class="admin-nav-item active">
+            <i data-lucide="users" width="18" height="18"></i>
+            Customers
+          </a>
+          <a href="#" class="admin-nav-item">
+            <i data-lucide="star" width="18" height="18"></i>
+            Reviews
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Storefront</div>
+          <a href="../../index.html" class="admin-nav-item">
+            <i data-lucide="store" width="18" height="18"></i>
+            View Store
+          </a>
+          <button class="admin-nav-item" id="admin-logout" style="border:none;width:100%;text-align:left;cursor:pointer;background:none;color:var(--color-error);">
+            <i data-lucide="log-out" width="18" height="18"></i>
+            Logout
+          </button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ============================================================ MAIN CONTENT ============================================================ -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div>
+          <h1 class="admin-page-title" style="margin-bottom:4px;">Customer Management</h1>
+          <p style="color:var(--color-text-muted); font-size:var(--text-sm); margin:0;">
+            View registered shoppers, purchase frequencies, and contact profiles
+          </p>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Light / Dark Mode Toggle -->
+          <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="cursor:pointer; background:var(--color-surface); border:1px solid var(--color-border); width:40px; height:40px; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+            <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+          </button>
+          <a href="../../index.html" class="btn btn-outline btn-sm">
+            <i data-lucide="external-link" width="14" height="14"></i>
+            Go to Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:var(--space-4); margin-bottom:var(--space-6);">
+        <div class="stat-card" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Total Shoppers</span>
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:var(--color-gold-glow); display:flex; align-items:center; justify-content:center; color:var(--color-gold);"><i data-lucide="users" width="18" height="18"></i></div>
+          </div>
+          <div style="font-family:var(--font-heading); font-size:26px; font-weight:800; color:var(--color-text);" id="stat-total-users">1,208</div>
+          <div style="font-size:12px; color:var(--color-success); margin-top:4px; display:flex; align-items:center; gap:4px;"><i data-lucide="trending-up" width="14" height="14"></i> +14% this month</div>
+        </div>
+
+        <div class="stat-card" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">VIP Members</span>
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:rgba(233,69,96,0.1); display:flex; align-items:center; justify-content:center; color:var(--color-accent);"><i data-lucide="crown" width="18" height="18"></i></div>
+          </div>
+          <div style="font-family:var(--font-heading); font-size:26px; font-weight:800; color:var(--color-text);">154</div>
+          <div style="font-size:12px; color:var(--color-text-muted); margin-top:4px;">Spent &gt; Rs. 30,000</div>
+        </div>
+
+        <div class="stat-card" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Total Revenue</span>
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:rgba(76,175,110,0.1); display:flex; align-items:center; justify-content:center; color:var(--color-success);"><i data-lucide="badge-dollar-sign" width="18" height="18"></i></div>
+          </div>
+          <div style="font-family:var(--font-heading); font-size:26px; font-weight:800; color:var(--color-gold);">Rs. 396,300.00</div>
+          <div style="font-size:12px; color:var(--color-success); margin-top:4px;">Average order Rs. 6,800</div>
+        </div>
+
+        <div class="stat-card" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Satisfaction Rate</span>
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:var(--color-gold-glow); display:flex; align-items:center; justify-content:center; color:var(--color-gold);"><i data-lucide="star" width="18" height="18"></i></div>
+          </div>
+          <div style="font-family:var(--font-heading); font-size:26px; font-weight:800; color:var(--color-text);">98.4%</div>
+          <div style="font-size:12px; color:var(--color-text-muted); margin-top:4px;">Based on verified reviews</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-4); margin-bottom:var(--space-4); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div style="position:relative; flex:1; min-width:260px;">
+          <i data-lucide="search" width="16" height="16" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-text-faint);"></i>
+          <input type="text" id="customer-search" class="form-control" placeholder="Search by name, email, or city..." style="padding-left:40px; height:42px;" oninput="filterCustomers()" />
+        </div>
+
+        <div class="filter-chips" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="chip active" onclick="setTierFilter('', this)" style="cursor:pointer; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; background:var(--color-gold); color:var(--color-bg); border:none;">All Shoppers</button>
+          <button class="chip" onclick="setTierFilter('VIP', this)" style="cursor:pointer; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; background:var(--color-surface-2); color:var(--color-text-muted); border:1px solid var(--color-border);">VIP Gold</button>
+          <button class="chip" onclick="setTierFilter('Verified', this)" style="cursor:pointer; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; background:var(--color-surface-2); color:var(--color-text-muted); border:1px solid var(--color-border);">Verified Buyers</button>
+          <button class="chip" onclick="setTierFilter('New', this)" style="cursor:pointer; padding:6px 14px; border-radius:var(--radius-full); font-size:12px; font-weight:600; background:var(--color-surface-2); color:var(--color-text-muted); border:1px solid var(--color-border);">New Customers</button>
+        </div>
+      </div>
+
+      <!-- Customers Table -->
+      <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="admin-table" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--color-border); background:var(--color-surface-2);">
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Customer</th>
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Contact</th>
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Location</th>
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Total Orders</th>
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Total Spent</th>
+                <th style="padding:14px 18px; text-align:left; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Tier</th>
+                <th style="padding:14px 18px; text-align:right; font-size:12px; color:var(--color-text-muted); font-weight:600; text-transform:uppercase;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customers-tbody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../../js/app.js?v=25" type="module"></script>
+  <script type="module">
+    import { logoutUser } from '../../js/auth.js';
+
+    lucide.createIcons();
+
+    let allCustomers = [];
+    let currentTier = '';
+
+    const defaultCustomers = [
+      {
+        id: 'c-1',
+        name: 'Ashan Perera',
+        email: 'ashan.perera@gmail.com',
+        phone: '+94 77 123 4567',
+        city: 'Colombo, Western Province',
+        ordersCount: 4,
+        totalSpent: 38400,
+        tier: 'VIP',
+        joined: 'Jan 2026'
+      },
+      {
+        id: 'c-2',
+        name: 'Ayesha Fernando',
+        email: 'ayesha.f@hotmail.com',
+        phone: '+94 71 884 1920',
+        city: 'Kandy, Central Province',
+        ordersCount: 3,
+        totalSpent: 22800,
+        tier: 'Verified',
+        joined: 'Feb 2026'
+      },
+      {
+        id: 'c-3',
+        name: 'Kasun Perera',
+        email: 'kasun.p@yahoo.com',
+        phone: '+94 76 551 2938',
+        city: 'Negombo, Western Province',
+        ordersCount: 2,
+        totalSpent: 11400,
+        tier: 'Verified',
+        joined: 'Mar 2026'
+      },
+      {
+        id: 'c-4',
+        name: 'Sanduni Silva',
+        email: 'sanduni.silva@gmail.com',
+        phone: '+94 72 334 9102',
+        city: 'Galle, Southern Province',
+        ordersCount: 5,
+        totalSpent: 42100,
+        tier: 'VIP',
+        joined: 'Dec 2025'
+      },
+      {
+        id: 'c-5',
+        name: 'Nuwan Bandara',
+        email: 'nuwan.b@outlook.com',
+        phone: '+94 77 912 3041',
+        city: 'Kurunegala, North Western',
+        ordersCount: 1,
+        totalSpent: 7900,
+        tier: 'New',
+        joined: 'Sep 2026'
+      },
+      {
+        id: 'c-6',
+        name: 'Kavindi Perera',
+        email: 'kavindi.p@gmail.com',
+        phone: '+94 75 119 2834',
+        city: 'Gampaha, Western Province',
+        ordersCount: 2,
+        totalSpent: 14700,
+        tier: 'Verified',
+        joined: 'Aug 2026'
+      },
+      {
+        id: 'c-7',
+        name: 'Shenaya Silva',
+        email: 'shenaya.s@gmail.com',
+        phone: '+94 78 440 1829',
+        city: 'Colombo, Western Province',
+        ordersCount: 3,
+        totalSpent: 26500,
+        tier: 'VIP',
+        joined: 'May 2026'
+      }
+    ];
+
+    function loadCustomers() {
+      allCustomers = [...defaultCustomers];
+
+      // Add any live placed orders customer details
+      try {
+        const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+        placed.forEach(o => {
+          if (o.shippingAddress && o.shippingAddress.firstName) {
+            const fullName = `${o.shippingAddress.firstName} ${o.shippingAddress.lastName || ''}`.trim();
+            const existing = allCustomers.find(c => c.name.toLowerCase() === fullName.toLowerCase());
+            if (!existing) {
+              allCustomers.unshift({
+                id: 'c-live-' + Math.floor(Math.random() * 1000),
+                name: fullName,
+                email: o.userEmail || `${o.shippingAddress.firstName.toLowerCase()}@example.com`,
+                phone: o.shippingAddress.phone || '+94 77 123 4567',
+                city: `${o.shippingAddress.city || 'Colombo'}, Western`,
+                ordersCount: 1,
+                totalSpent: o.total || 15800,
+                tier: 'Verified',
+                joined: 'Today'
+              });
+            }
+          }
+        });
+      } catch (e) {}
+
+      document.getElementById('stat-total-users').textContent = (1205 + allCustomers.length).toLocaleString();
+      renderCustomers(allCustomers);
+    }
+
+    function renderCustomers(list) {
+      const tbody = document.getElementById('customers-tbody');
+      if (!tbody) return;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="padding:48px 20px; text-align:center; color:var(--color-text-muted);">
+              <i data-lucide="user-x" width="36" height="36" style="color:var(--color-gold); margin-bottom:8px;"></i>
+              <div>No shoppers found matching your filter criteria.</div>
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => {
+        const initials = c.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const tierBadge = c.tier === 'VIP'
+          ? '<span class="badge badge-accent" style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="crown" width="12" height="12"></i> VIP Gold</span>'
+          : c.tier === 'Verified'
+          ? '<span class="badge badge-success" style="display:inline-flex; align-items:center; gap:4px;"><i data-lucide="check" width="12" height="12"></i> Verified</span>'
+          : '<span class="badge badge-gold">New</span>';
+
+        return `
+          <tr style="border-bottom:1px solid var(--color-border); transition:background 0.2s;" onmouseover="this.style.background='var(--color-surface-2)'" onmouseout="this.style.background='transparent'">
+            <td style="padding:14px 18px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:38px; height:38px; border-radius:var(--radius-full); background:var(--color-surface-2); border:1px solid var(--color-gold); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--color-gold); font-size:13px; flex-shrink:0;">
+                  ${initials}
+                </div>
+                <div>
+                  <div style="font-weight:700; font-size:14px; color:var(--color-text);">${c.name}</div>
+                  <div style="font-size:11px; color:var(--color-text-faint);">Member since ${c.joined}</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding:14px 18px;">
+              <div style="font-size:13px; color:var(--color-text);">${c.email}</div>
+              <div style="font-size:12px; color:var(--color-text-muted);">${c.phone}</div>
+            </td>
+            <td style="padding:14px 18px; font-size:13px; color:var(--color-text-muted);">
+              ${c.city}
+            </td>
+            <td style="padding:14px 18px;">
+              <span style="display:inline-block; padding:3px 10px; background:var(--color-surface-2); border-radius:var(--radius-md); font-weight:700; font-size:13px; color:var(--color-text);">
+                ${c.ordersCount} orders
+              </span>
+            </td>
+            <td style="padding:14px 18px; font-family:var(--font-heading); font-weight:700; color:var(--color-gold); font-size:15px;">
+              Rs. ${c.totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </td>
+            <td style="padding:14px 18px;">
+              ${tierBadge}
+            </td>
+            <td style="padding:14px 18px; text-align:right;">
+              <div style="display:flex; gap:6px; justify-content:flex-end;">
+                <a href="orders.html" class="btn btn-outline btn-sm" title="View Orders" style="padding:4px 8px; font-size:11px; gap:4px;">
+                  <i data-lucide="package" width="13" height="13"></i> Orders
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    window.filterCustomers = () => {
+      const q = (document.getElementById('customer-search').value || '').toLowerCase().trim();
+      let filtered = allCustomers;
+      if (q) {
+        filtered = filtered.filter(c =>
+          c.name.toLowerCase().includes(q) ||
+          c.email.toLowerCase().includes(q) ||
+          c.phone.includes(q) ||
+          c.city.toLowerCase().includes(q)
+        );
+      }
+      if (currentTier) {
+        filtered = filtered.filter(c => c.tier === currentTier);
+      }
+      renderCustomers(filtered);
+    };
+
+    window.setTierFilter = (tier, btn) => {
+      currentTier = tier;
+      document.querySelectorAll('.filter-chips .chip').forEach(c => {
+        c.style.background = 'var(--color-surface-2)';
+        c.style.color = 'var(--color-text-muted)';
+        c.style.border = '1px solid var(--color-border)';
+      });
+      btn.style.background = 'var(--color-gold)';
+      btn.style.color = 'var(--color-bg)';
+      btn.style.border = 'none';
+      filterCustomers();
+    };
+
+    document.getElementById('admin-logout')?.addEventListener('click', () => logoutUser());
+
+    loadCustomers();
+  </script>
+  <!-- Shenu AI Chatbot Assistant -->
+  <script src="../../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
+</body>
+</html>

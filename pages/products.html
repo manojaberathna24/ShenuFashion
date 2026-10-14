@@ -6,11 +6,39 @@
   <title>All Products — Shenu Fashion Store</title>
   <meta name="description" content="Browse our complete collection of fashion products. Filter by category, price, size, and color to find your perfect style." />
 
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=25" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -28,9 +56,15 @@
         <li><a href="products.html" class="nav-link active">Products</a></li>
         <li><a href="products.html?cat=women" class="nav-link">Women</a></li>
         <li><a href="products.html?cat=men" class="nav-link">Men</a></li>
-        <li><a href="products.html?cat=accessories" class="nav-link">Accessories</a></li>
+        <li><a href="orders.html" class="nav-link">My Orders</a></li>
+        <li><a href="track-order.html" class="nav-link" style="color:var(--color-gold); font-weight:600;">Track Order</a></li>
       </ul>
       <div class="navbar-actions">
+        <!-- Light / Dark Mode Toggle -->
+        <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+          <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+        </button>
         <div class="search-bar" style="width:220px;">
           <i data-lucide="search" width="14" height="14" class="search-icon"></i>
           <input type="text" id="product-search" placeholder="Search products..." />
@@ -126,19 +160,19 @@
           <div class="filter-section">
             <div class="filter-title">Category</div>
             <div style="display:flex; flex-direction:column; gap:6px;" id="category-filters">
-              <label class="form-check"><input type="radio" name="category" value="" checked onchange="applyFilters()"> <span class="form-check-label">All Categories</span></label>
-              <label class="form-check"><input type="radio" name="category" value="women" onchange="applyFilters()"> <span class="form-check-label">Women (142)</span></label>
-              <label class="form-check"><input type="radio" name="category" value="men" onchange="applyFilters()"> <span class="form-check-label">Men (98)</span></label>
-              <label class="form-check"><input type="radio" name="category" value="dresses" onchange="applyFilters()"> <span class="form-check-label">Dresses (76)</span></label>
-              <label class="form-check"><input type="radio" name="category" value="accessories" onchange="applyFilters()"> <span class="form-check-label">Accessories (54)</span></label>
-              <label class="form-check"><input type="radio" name="category" value="shoes" onchange="applyFilters()"> <span class="form-check-label">Shoes (67)</span></label>
-              <label class="form-check"><input type="radio" name="category" value="bags" onchange="applyFilters()"> <span class="form-check-label">Bags (43)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="" checked onchange="applyFilters()"> <span class="form-check-label">All Categories (150)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="women" onchange="applyFilters()"> <span class="form-check-label">Women (50)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="men" onchange="applyFilters()"> <span class="form-check-label">Men (25)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="dresses" onchange="applyFilters()"> <span class="form-check-label">Dresses (25)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="accessories" onchange="applyFilters()"> <span class="form-check-label">Accessories (25)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="shoes" onchange="applyFilters()"> <span class="form-check-label">Shoes (25)</span></label>
+              <label class="form-check"><input type="radio" name="category" value="bags" onchange="applyFilters()"> <span class="form-check-label">Bags (25)</span></label>
             </div>
           </div>
 
           <!-- Price Range -->
           <div class="filter-section">
-            <div class="filter-title">Price Range (LKR)</div>
+            <div class="filter-title">Price Range (Rs.)</div>
             <div class="price-range-inputs">
               <input type="number" id="min-price" placeholder="Min" min="0" onchange="applyFilters()" />
               <span style="color:var(--color-text-faint);">—</span>
@@ -231,40 +265,54 @@
     </div>
   </main>
 
-  <!-- ============================================================ SCRIPTS ============================================================ -->
-  <script src="../js/app.js" type="module"></script>
+    <!-- ============================================================ SCRIPTS ============================================================ -->
+  <script src="../js/app.js?v=25" type="module"></script>
   <script type="module">
-    import { getProducts, renderProductCard, renderProductSkeletons } from '../js/products.js';
+    import { getProducts, renderProductCard, renderProductSkeletons } from '../js/products.js?v=7';
     import { addToCart, toggleWishlist } from '../js/cart.js';
     import { logoutUser } from '../js/auth.js';
 
     lucide.createIcons();
 
     // State
-    let currentFilters = { category: '', search: '', minPrice: null, maxPrice: null, sizes: [], colors: [], isNew: false, onSale: false };
+    let currentFilters = { category: '', search: '', minPrice: null, maxPrice: null, isNew: false, onSale: false };
     let currentSort = 'createdAt-desc';
-    let lastDoc = null;
-    let totalProducts = 0;
     let selectedSizes = [];
     let selectedColors = [];
+    let lastDoc = null;
 
-    // Parse URL params on load
+    // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('cat'))    { currentFilters.category = urlParams.get('cat'); document.querySelector(`input[name="category"][value="${currentFilters.category}"]`)?.click(); }
-    if (urlParams.get('search')) { currentFilters.search = urlParams.get('search'); document.getElementById('product-search').value = currentFilters.search; }
-    if (urlParams.get('new'))    { currentFilters.isNew = true; document.getElementById('filter-new').checked = true; }
-    if (urlParams.get('sale'))   { currentFilters.onSale = true; document.getElementById('filter-sale').checked = true; }
+    if (urlParams.get('cat')) {
+      currentFilters.category = urlParams.get('cat');
+      const radio = document.querySelector(`input[name="category"][value="${currentFilters.category}"]`);
+      if (radio) radio.checked = true;
+    }
+    if (urlParams.get('search')) {
+      currentFilters.search = urlParams.get('search');
+      const searchBox = document.getElementById('product-search');
+      if (searchBox) searchBox.value = currentFilters.search;
+    }
+    if (urlParams.get('new')) {
+      currentFilters.isNew = true;
+      const chkNew = document.getElementById('filter-new');
+      if (chkNew) chkNew.checked = true;
+    }
+    if (urlParams.get('sale')) {
+      currentFilters.onSale = true;
+      const chkSale = document.getElementById('filter-sale');
+      if (chkSale) chkSale.checked = true;
+    }
 
-    // Update page title & breadcrumb
     function updatePageTitle() {
       const labels = { women:'Women', men:'Men', dresses:'Dresses', accessories:'Accessories', shoes:'Shoes', bags:'Bags' };
-      const label = labels[currentFilters.category] || (currentFilters.search ? `"${currentFilters.search}"` : 'All Products');
+      const label = labels[currentFilters.category?.toLowerCase()] || (currentFilters.search ? `"${currentFilters.search}"` : 'All Products');
       document.getElementById('page-title').textContent = label;
       document.getElementById('breadcrumb-current').textContent = label;
       document.title = `${label} — Shenu Fashion Store`;
     }
 
-    // Load products
+    // Dynamic Product Loader
     async function loadProducts(append = false) {
       const grid = document.getElementById('products-grid');
       const [sortBy, sortDir] = currentSort.split('-');
@@ -275,98 +323,86 @@
         lastDoc = null;
       }
 
-      const result = await getProducts({
-        category: currentFilters.category || null,
-        search: currentFilters.search || null,
-        minPrice: currentFilters.minPrice,
-        maxPrice: currentFilters.maxPrice,
-        sizes: selectedSizes,
-        colors: selectedColors,
-        sortBy, sortDir,
-        isNew: currentFilters.isNew,
-        onSale: currentFilters.onSale,
-        pageSize: 12,
-        afterDoc: append ? lastDoc : null,
-      });
+      updatePageTitle();
+
+      let result = { products: [], totalCount: 0, lastDoc: null, hasMore: false };
+      try {
+        result = await getProducts({
+          category: currentFilters.category || null,
+          search: currentFilters.search || null,
+          minPrice: currentFilters.minPrice,
+          maxPrice: currentFilters.maxPrice,
+          sizes: selectedSizes,
+          colors: selectedColors,
+          sortBy,
+          sortDir,
+          isNew: currentFilters.isNew,
+          onSale: currentFilters.onSale,
+          pageSize: 25,
+          afterDoc: append ? lastDoc : null,
+        });
+      } catch (err) {
+        console.error("loadProducts getProducts error:", err);
+      }
 
       lastDoc = result.lastDoc;
-      const products = result.products;
+      const products = result.products || [];
 
       if (!append) {
         if (products.length === 0) {
-          // Show demo products if Firestore empty or not configured
-          grid.innerHTML = getDemoProducts();
-          document.getElementById('products-count').textContent = '6 products found';
-          const loadMoreWrapper = document.getElementById('load-more-wrapper');
-          if (loadMoreWrapper) loadMoreWrapper.style.display = 'none';
+          grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--color-surface); border-radius: var(--radius-2xl); border: 1px solid var(--color-border);">
+              <i data-lucide="package-search" width="48" height="48" style="color: var(--color-gold); margin-bottom: 16px;"></i>
+              <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">No Products Found</h3>
+              <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 20px;">Try adjusting your price range, category, or search filters.</p>
+              <button class="btn btn-outline" onclick="clearAllFilters()">Clear All Filters</button>
+            </div>
+          `;
+          document.getElementById('products-count').textContent = '0 products found';
+          document.getElementById('load-more-wrapper').style.display = 'none';
         } else {
-          grid.innerHTML = products.map(renderProductCard).join('');
-          document.getElementById('products-count').textContent = `${products.length} products found`;
+          grid.innerHTML = products.map((p, idx) => renderProductCard(p, idx)).join('');
+          document.getElementById('products-count').textContent = `${result.totalCount || products.length} products found`;
+          document.getElementById('load-more-wrapper').style.display = result.hasMore ? 'block' : 'none';
         }
       } else {
         if (products.length > 0) {
-          grid.insertAdjacentHTML('beforeend', products.map(renderProductCard).join(''));
+          grid.insertAdjacentHTML('beforeend', products.map((p, idx) => renderProductCard(p, idx)).join(''));
+          document.getElementById('load-more-wrapper').style.display = result.hasMore ? 'block' : 'none';
         }
       }
 
-      document.getElementById('load-more-wrapper').style.display = result.hasMore ? 'block' : 'none';
       lucide.createIcons();
     }
 
-    function getDemoProducts() {
-      const demos = [
-        { id:'d1', name:'Floral Summer Dress', category:'Women', price:4500, salePrice:3200, rating:4.5, reviewCount:24, isNew:true, img:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80' },
-        { id:'d2', name:'Classic Oxford Shirt', category:'Men', price:3800, rating:4.2, reviewCount:18, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80' },
-        { id:'d3', name:'Leather Crossbody Bag', category:'Bags', price:8900, salePrice:6500, rating:4.8, reviewCount:36, img:'https://images.unsplash.com/photo-1550614000-4b95dd247545?auto=format&fit=crop&w=600&q=80' },
-        { id:'d4', name:'Silk Evening Blouse', category:'Women', price:5200, rating:4.3, reviewCount:12, isNew:true, img:'https://images.unsplash.com/photo-1434389670869-c44943f2d7ac?auto=format&fit=crop&w=600&q=80' },
-        { id:'d5', name:'High Heels Sandals', category:'Shoes', price:5200, rating:4.1, reviewCount:10, img:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=600&q=80' },
-        { id:'d6', name:'Gold Chain Necklace', category:'Accessories', price:1800, rating:4.6, reviewCount:44, img:'https://images.unsplash.com/photo-1599643478514-4a820c5678eb?auto=format&fit=crop&w=600&q=80' }
-      ];
-
-      return demos.map(p => `
-        <div class="product-card" style="animation: scaleIn 0.5s ease backwards;">
-          <div class="product-card-image">
-            <img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" />
-            <div class="product-card-badges">
-              ${p.isNew ? '<span class="badge badge-gold">New</span>' : ''}
-              ${p.salePrice ? `<span class="badge badge-accent">-${Math.round((1 - p.salePrice/p.price)*100)}%</span>` : ''}
-            </div>
-            <div class="product-card-actions">
-              <button class="product-action-btn" onclick="toggleWishlist('${p.id}', this)"><i data-lucide="heart" width="16" height="16"></i></button>
-            </div>
-          </div>
-          <div class="product-card-body">
-            <div class="product-card-category">${p.category}</div>
-            <div class="product-card-name">${p.name}</div>
-            <div class="product-card-rating">
-              <span style="color:var(--color-gold);">★</span> ${p.rating} <span class="rating-count">(${p.reviewCount})</span>
-            </div>
-            <div class="product-card-price">
-              <span class="price-current">LKR ${(p.salePrice || p.price).toLocaleString()}</span>
-              ${p.salePrice ? `<span class="price-original">LKR ${p.price.toLocaleString()}</span>` : ''}
-            </div>
-          </div>
-          <div class="product-card-footer">
-            <button class="btn-add-cart" onclick="event.stopPropagation(); cartAction('${p.id}')">
-              <i data-lucide="shopping-cart" width="15" height="15"></i> Add to Cart
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Filter functions
-    window.applyFilters = window.debounce(() => {
+    // Dynamic Filter Trigger
+    window.applyFilters = () => {
       currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || '';
-      currentFilters.minPrice = parseFloat(document.getElementById('min-price').value) || null;
-      currentFilters.maxPrice = parseFloat(document.getElementById('max-price').value) || null;
+      
+      const minVal = document.getElementById('min-price').value.trim();
+      const maxVal = document.getElementById('max-price').value.trim();
+      currentFilters.minPrice = minVal !== '' ? parseFloat(minVal) : null;
+      currentFilters.maxPrice = maxVal !== '' ? parseFloat(maxVal) : null;
+      
       currentFilters.isNew    = document.getElementById('filter-new').checked;
       currentFilters.onSale   = document.getElementById('filter-sale').checked;
-      updatePageTitle();
-      updateActiveFilters();
-      loadProducts(false);
-    }, 400);
 
+      loadProducts(false);
+    };
+
+    // Sort Dropdown Event Listener
+    document.getElementById('sort-select')?.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      loadProducts(false);
+    });
+
+    // Search input
+    document.getElementById('product-search')?.addEventListener('input', (e) => {
+      currentFilters.search = e.target.value.trim();
+      loadProducts(false);
+    });
+
+    // Sizes toggle
     window.toggleSize = (btn) => {
       btn.classList.toggle('active');
       const size = btn.dataset.size;
@@ -376,6 +412,7 @@
       applyFilters();
     };
 
+    // Colors toggle
     window.toggleColor = (dot) => {
       dot.classList.toggle('active');
       const color = dot.dataset.color;
@@ -385,53 +422,29 @@
       applyFilters();
     };
 
+    // Clear filters
     window.clearAllFilters = () => {
-      document.querySelectorAll('input[name="category"]')[0].checked = true;
+      const allRadio = document.querySelector('input[name="category"][value=""]');
+      if (allRadio) allRadio.checked = true;
       document.getElementById('min-price').value = '';
       document.getElementById('max-price').value = '';
       document.getElementById('filter-new').checked = false;
       document.getElementById('filter-sale').checked = false;
-      document.getElementById('filter-instock').checked = false;
-      document.querySelectorAll('input[name="rating"]')[0].checked = true;
+      document.getElementById('product-search').value = '';
+      
+      selectedSizes = [];
+      selectedColors = [];
       document.querySelectorAll('.size-btn.active').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.color-dot.active').forEach(d => d.classList.remove('active'));
-      selectedSizes = []; selectedColors = [];
-      currentFilters = { category:'', search:'', minPrice:null, maxPrice:null, sizes:[], colors:[], isNew:false, onSale:false };
-      updateActiveFilters();
+
+      currentFilters = { category: '', search: '', minPrice: null, maxPrice: null, isNew: false, onSale: false };
       loadProducts(false);
     };
 
-    function updateActiveFilters() {
-      const container = document.getElementById('active-filters');
-      const chips = [];
-      if (currentFilters.category) chips.push(`Category: ${currentFilters.category}`);
-      if (currentFilters.minPrice) chips.push(`Min: LKR ${currentFilters.minPrice}`);
-      if (currentFilters.maxPrice) chips.push(`Max: LKR ${currentFilters.maxPrice}`);
-      if (currentFilters.isNew)    chips.push('New Arrivals');
-      if (currentFilters.onSale)   chips.push('On Sale');
-      selectedSizes.forEach(s  => chips.push(`Size: ${s}`));
-      selectedColors.forEach(c => chips.push(`Color: ${c}`));
-
-      container.style.display = chips.length ? 'flex' : 'none';
-      container.innerHTML = chips.map(c => `<div class="chip active">${c} <span onclick="clearAllFilters()" style="cursor:pointer; margin-left:4px;">×</span></div>`).join('');
-    }
-
-    // Search
-    document.getElementById('product-search')?.addEventListener('input', window.debounce((e) => {
-      currentFilters.search = e.target.value;
-      loadProducts(false);
-    }, 500));
-
-    // Sort
-    document.getElementById('sort-select')?.addEventListener('change', (e) => {
-      currentSort = e.target.value;
-      loadProducts(false);
-    });
-
-    // Load more
+    // Load More
     document.getElementById('load-more-btn')?.addEventListener('click', () => loadProducts(true));
 
-    // Cart & Wishlist actions
+    // Cart action
     window.cartAction = (id) => {
       const cart = JSON.parse(localStorage.getItem('shenu_cart') || '[]');
       const ex = cart.find(i => i.productId === id);
@@ -441,39 +454,24 @@
       showToast('Added to cart! 🛒', 'success', 'Cart');
     };
 
+    // Wishlist action
     window.wishlistAction = (id) => {
-      if (!window.currentUser) { showToast('Please sign in to save to wishlist.', 'warning'); return; }
       showToast('Added to wishlist! ❤️', 'success', 'Wishlist');
     };
 
-    // View toggle
-    document.getElementById('grid-view-btn')?.addEventListener('click', () => {
-      document.getElementById('products-grid').className = 'products-grid';
-      document.getElementById('grid-view-btn').style.background = 'var(--color-gold)';
-      document.getElementById('grid-view-btn').style.color = '#0F0F1A';
-      document.getElementById('list-view-btn').style.background = 'transparent';
-      document.getElementById('list-view-btn').style.color = 'var(--color-text-muted)';
-    });
-
-    document.getElementById('list-view-btn')?.addEventListener('click', () => {
-      document.getElementById('products-grid').style.gridTemplateColumns = '1fr';
-      document.getElementById('list-view-btn').style.background = 'var(--color-gold)';
-      document.getElementById('list-view-btn').style.color = '#0F0F1A';
-      document.getElementById('grid-view-btn').style.background = 'transparent';
-      document.getElementById('grid-view-btn').style.color = 'var(--color-text-muted)';
-    });
-
-    // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', () => logoutUser());
-
     // Initial load
-    updatePageTitle();
     loadProducts(false);
   </script>
-
-  <script src="../js/app.js" type="module"></script>
-  <script type="module">
-    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
-  </script>
+  <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
+  <script src="../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

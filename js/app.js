@@ -3,20 +3,22 @@
 // ============================================================
 
 // ---- Page Loader ----
-window.addEventListener('load', () => {
+function dismissLoader() {
   const loader = document.getElementById('page-loader');
-  if (loader) {
-    setTimeout(() => loader.classList.add('loaded'), 600);
+  if (loader && !loader.classList.contains('loaded')) {
+    loader.classList.add('loaded');
+    setTimeout(() => {
+      if (loader.parentNode) loader.style.display = 'none';
+    }, 400);
   }
-});
-
-// ---- Navbar scroll effect ----
-const navbar = document.getElementById('main-navbar');
-if (navbar) {
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  });
 }
+if (document.readyState === 'complete') {
+  dismissLoader();
+} else {
+  window.addEventListener('load', dismissLoader);
+  document.addEventListener('DOMContentLoaded', () => setTimeout(dismissLoader, 300));
+}
+setTimeout(dismissLoader, 800);
 
 // ---- Mobile nav toggle ----
 const navToggle = document.getElementById('nav-toggle');
@@ -151,12 +153,9 @@ window.addEventListener('cart-updated', updateCartCount);
 // ============================================================
 
 /** Format currency */
-window.formatCurrency = function(amount, currency = 'LKR') {
-  return new Intl.NumberFormat('si-LK', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2
-  }).format(amount);
+window.formatCurrency = function(amount) {
+  const num = Number(amount) || 0;
+  return 'Rs. ' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 /** Format date */
@@ -214,3 +213,47 @@ window.getInitials = function(name) {
 window.scrollToEl = function(selector) {
   document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 };
+
+// ============================================================
+// LIGHT / DARK THEME MANAGER
+// ============================================================
+export function initTheme() {
+  const savedTheme = localStorage.getItem('shenu_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (document.body) {
+    document.body.setAttribute('data-theme', savedTheme);
+  }
+  updateThemeIcons(savedTheme);
+}
+
+export function updateThemeIcons(theme) {
+  const isLight = theme === 'light';
+  document.querySelectorAll('.theme-icon-sun').forEach(i => {
+    i.style.display = isLight ? 'none' : 'inline-block';
+  });
+  document.querySelectorAll('.theme-icon-moon').forEach(i => {
+    i.style.display = isLight ? 'inline-block' : 'none';
+  });
+}
+
+window.updateThemeIcons = updateThemeIcons;
+
+window.toggleTheme = function() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  if (document.body) {
+    document.body.setAttribute('data-theme', next);
+  }
+  try {
+    localStorage.setItem('shenu_theme', next);
+  } catch (e) {}
+  updateThemeIcons(next);
+  if (typeof window.showToast === 'function') {
+    showToast(`${next === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode'} Activated`, 'info');
+  }
+};
+
+// Immediate execution
+initTheme();
+document.addEventListener('DOMContentLoaded', initTheme);

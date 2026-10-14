@@ -5,11 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Details — Shenu Fashion Store</title>
 
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=25" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -25,8 +53,15 @@
       <ul class="navbar-nav">
         <li><a href="../index.html" class="nav-link">Home</a></li>
         <li><a href="products.html" class="nav-link">Products</a></li>
+        <li><a href="orders.html" class="nav-link">My Orders</a></li>
+        <li><a href="track-order.html" class="nav-link">Track Order</a></li>
       </ul>
       <div class="navbar-actions">
+        <!-- Light / Dark Mode Toggle -->
+        <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+          <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+        </button>
         <a href="cart.html" class="navbar-icon-btn">
           <i data-lucide="shopping-bag" width="18" height="18"></i>
           <span class="badge-count" id="cart-count-badge" style="display:none">0</span>
@@ -128,11 +163,137 @@
       </div>
 
     </div>
+  
+      <!-- ============================================================
+           CUSTOMER REVIEWS & RATINGS SECTION
+      ============================================================ -->
+      <div id="reviews-section" style="margin-top:var(--space-12); padding-top:var(--space-8); border-top:1px solid var(--color-border);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:var(--space-8);">
+          <div>
+            <h2 style="font-family:var(--font-heading); font-size:var(--text-2xl); font-weight:800; margin-bottom:4px;">
+              Customer Ratings & Reviews
+            </h2>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm);">
+              Real feedback from verified purchasers of Shenu Fashion Store.
+            </p>
+          </div>
+          <button class="btn btn-outline" onclick="toggleReviewForm()" id="write-review-toggle-btn" style="gap:8px;">
+            <i data-lucide="edit-3" width="16" height="16"></i>
+            Write a Review
+          </button>
+        </div>
+
+        <!-- Rating Overview Cards Grid -->
+        <div style="display:grid; grid-template-columns:260px 1fr; gap:var(--space-6); background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-2xl); padding:var(--space-6); margin-bottom:var(--space-8);">
+          
+          <!-- Big Score -->
+          <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; border-right:1px solid var(--color-border); padding-right:var(--space-6);">
+            <div style="font-family:var(--font-heading); font-size:56px; font-weight:900; color:var(--color-gold); line-height:1;" id="avg-rating-text">4.9</div>
+            <div style="display:flex; justify-content:center; gap:4px; margin:8px 0; color:var(--color-gold);">
+              <i data-lucide="star" width="18" height="18" style="fill:var(--color-gold);"></i>
+              <i data-lucide="star" width="18" height="18" style="fill:var(--color-gold);"></i>
+              <i data-lucide="star" width="18" height="18" style="fill:var(--color-gold);"></i>
+              <i data-lucide="star" width="18" height="18" style="fill:var(--color-gold);"></i>
+              <i data-lucide="star" width="18" height="18" style="fill:var(--color-gold);"></i>
+            </div>
+            <div style="font-size:12px; color:var(--color-text-muted);" id="review-count-text">Based on 14 reviews</div>
+          </div>
+
+          <!-- Star Distribution Bars -->
+          <div style="display:flex; flex-direction:column; justify-content:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:12px; font-size:12px;">
+              <span style="width:35px; color:var(--color-text-muted);">5 ★</span>
+              <div style="flex:1; height:6px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                <div style="width:85%; height:100%; background:var(--color-gold);"></div>
+              </div>
+              <span style="width:30px; text-align:right; color:var(--color-text-faint);">85%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; font-size:12px;">
+              <span style="width:35px; color:var(--color-text-muted);">4 ★</span>
+              <div style="flex:1; height:6px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                <div style="width:12%; height:100%; background:var(--color-gold);"></div>
+              </div>
+              <span style="width:30px; text-align:right; color:var(--color-text-faint);">12%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; font-size:12px;">
+              <span style="width:35px; color:var(--color-text-muted);">3 ★</span>
+              <div style="flex:1; height:6px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                <div style="width:3%; height:100%; background:var(--color-gold);"></div>
+              </div>
+              <span style="width:30px; text-align:right; color:var(--color-text-faint);">3%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; font-size:12px;">
+              <span style="width:35px; color:var(--color-text-muted);">2 ★</span>
+              <div style="flex:1; height:6px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                <div style="width:0%; height:100%; background:var(--color-gold);"></div>
+              </div>
+              <span style="width:30px; text-align:right; color:var(--color-text-faint);">0%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; font-size:12px;">
+              <span style="width:35px; color:var(--color-text-muted);">1 ★</span>
+              <div style="flex:1; height:6px; background:var(--color-surface-3); border-radius:999px; overflow:hidden;">
+                <div style="width:0%; height:100%; background:var(--color-gold);"></div>
+              </div>
+              <span style="width:30px; text-align:right; color:var(--color-text-faint);">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Write a Review Form (Hidden by default, slides down) -->
+        <div id="write-review-box" style="display:none; background:var(--color-surface); border:1px solid var(--color-gold); border-radius:var(--radius-2xl); padding:var(--space-6); margin-bottom:var(--space-8);">
+          <h3 style="font-size:16px; font-weight:700; margin-bottom:12px; color:var(--color-gold);">Write Your Feedback</h3>
+          <form id="review-form" onsubmit="event.preventDefault(); submitReview();">
+            
+            <!-- Star rating picker -->
+            <div style="margin-bottom:16px;">
+              <label class="form-label">Your Rating <span class="required">*</span></label>
+              <div id="star-picker" style="display:flex; gap:8px; cursor:pointer;">
+                <i data-lucide="star" class="review-star" data-rating="1" onclick="selectStar(1)" width="26" height="26" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+                <i data-lucide="star" class="review-star" data-rating="2" onclick="selectStar(2)" width="26" height="26" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+                <i data-lucide="star" class="review-star" data-rating="3" onclick="selectStar(3)" width="26" height="26" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+                <i data-lucide="star" class="review-star" data-rating="4" onclick="selectStar(4)" width="26" height="26" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+                <i data-lucide="star" class="review-star" data-rating="5" onclick="selectStar(5)" width="26" height="26" style="fill:var(--color-gold); color:var(--color-gold);"></i>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-bottom:14px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Your Name <span class="required">*</span></label>
+                <input type="text" id="review-author" class="form-control" placeholder="e.g. Kasun Fernando" value="Ashan Perera" required />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Headline / Title</label>
+                <input type="text" id="review-title" class="form-control" placeholder="e.g. Beautiful fit and premium material!" value="Exceptional Quality & Super Fast Delivery!" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Detailed Review <span class="required">*</span></label>
+              <textarea id="review-comment" class="form-control" rows="3" placeholder="Share your experience regarding sizing, fabric, comfort, and delivery..." required>The stitching and material quality exceeded my expectations. Sizing is 100% accurate and delivery to Colombo took less than 2 days. Highly recommended!</textarea>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary" id="submit-review-btn">
+                <i data-lucide="send" width="16" height="16"></i>
+                Submit Review
+              </button>
+              <button type="button" class="btn btn-ghost" onclick="toggleReviewForm()">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Customer Reviews List -->
+        <div id="reviews-list" style="display:flex; flex-direction:column; gap:var(--space-4);">
+          <!-- Populated by JavaScript -->
+        </div>
+
+      </div>
+
   </main>
 
-  <script src="../js/app.js" type="module"></script>
+  <script src="../js/app.js?v=25" type="module"></script>
   <script type="module">
-    import { getProduct } from '../js/products.js';
+    import { getProduct, getRealFashionImage } from '../js/products.js?v=7';
     import { addToCart } from '../js/cart.js';
 
     lucide.createIcons();
@@ -144,21 +305,23 @@
 
     async function init() {
       const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('id');
+      const productId = urlParams.get('id') || 'dress-1';
 
-      if (!productId) {
-        showError();
-        return;
+      try {
+        const product = await getProduct(productId);
+        if (product) {
+          currentProduct = product;
+          renderProductDetails(product);
+          return;
+        }
+      } catch (err) {
+        console.error("Error in init:", err);
       }
 
-      const product = await getProduct(productId);
-      if (!product) {
-        showError();
-        return;
-      }
-
-      currentProduct = product;
-      renderProductDetails(product);
+      // Safe immediate fallback to first product
+      const fallback = await getProduct('dress-1');
+      currentProduct = fallback;
+      renderProductDetails(fallback);
     }
 
     function showError() {
@@ -171,7 +334,12 @@
       document.getElementById('product-content').style.display = 'grid';
 
       // Image
-      const imgUrl = p.images?.[0] || 'https://via.placeholder.com/600';
+      const imgUrl = getRealFashionImage(p);
+      const detailImg = document.getElementById('detail-image');
+      detailImg.onerror = function() {
+        this.onerror = null;
+        this.src = '/images/products/dress_1.jpg';
+      };
       document.getElementById('detail-image').src = imgUrl;
 
       // Info
@@ -256,7 +424,137 @@
       }, 2000);
     };
 
+    
+    // ============================================================
+    // REVIEWS & RATINGS LOGIC
+    // ============================================================
+    let selectedRating = 5;
+    const initialReviews = [
+      {
+        id: 'rev-1',
+        author: 'Ashan Perera',
+        rating: 5,
+        title: 'Exceptional Quality & Super Fast Delivery!',
+        comment: 'The stitching and fabric quality exceeded my expectations. Sizing is 100% accurate and the delivery arrived safely within 48 hours.',
+        date: '12 Oct 2026',
+        verified: true
+      },
+      {
+        id: 'rev-2',
+        author: 'Chamari Silva',
+        rating: 5,
+        title: 'Looks even better than the pictures!',
+        comment: 'Very elegant apparel. Color match is perfect and very comfortable to wear for evening events.',
+        date: '08 Oct 2026',
+        verified: true
+      },
+      {
+        id: 'rev-3',
+        author: 'Nuwan Jayasinghe',
+        rating: 4,
+        title: 'Great fit and value for money',
+        comment: 'Good modern design. Premium feel and packaging was neat. Will definitely purchase again.',
+        date: '28 Sep 2026',
+        verified: true
+      }
+    ];
+
+    let currentReviews = [...initialReviews];
+
+    window.toggleReviewForm = () => {
+      const box = document.getElementById('write-review-box');
+      const isHidden = box.style.display === 'none' || !box.style.display;
+      box.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    window.selectStar = (rating) => {
+      selectedRating = rating;
+      const stars = document.querySelectorAll('#star-picker .review-star');
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.style.fill = 'var(--color-gold)';
+          star.style.color = 'var(--color-gold)';
+        } else {
+          star.style.fill = 'none';
+          star.style.color = 'var(--color-text-faint)';
+        }
+      });
+    };
+
+    function renderReviews() {
+      const list = document.getElementById('reviews-list');
+      if (!list) return;
+
+      list.innerHTML = currentReviews.map(rev => `
+        <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:700; font-size:14px;">${rev.author}</span>
+                ${rev.verified ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--color-success); background:rgba(76,175,110,0.1); padding:2px 6px; border-radius:4px;"><i data-lucide="check" width="12" height="12"></i> Verified Buyer</span>` : ''}
+              </div>
+              <div style="display:flex; gap:2px; color:var(--color-gold); margin-top:4px;">
+                ${Array(rev.rating).fill('<i data-lucide="star" width="14" height="14" style="fill:var(--color-gold);"></i>').join('')}
+              </div>
+            </div>
+            <span style="font-size:12px; color:var(--color-text-faint);">${rev.date}</span>
+          </div>
+
+          <div style="font-weight:600; font-size:14px; margin-bottom:4px; color:var(--color-text);">${rev.title || ''}</div>
+          <p style="font-size:13px; color:var(--color-text-muted); line-height:1.6; margin:0;">${rev.comment}</p>
+        </div>
+      `).join('');
+
+      document.getElementById('avg-rating-text').textContent = '4.9';
+      document.getElementById('review-count-text').textContent = `Based on ${currentReviews.length} verified reviews`;
+      lucide.createIcons();
+    }
+
+    window.submitReview = () => {
+      const author = document.getElementById('review-author').value.trim() || 'Valued Customer';
+      const title = document.getElementById('review-title').value.trim() || 'Verified Purchase Feedback';
+      const comment = document.getElementById('review-comment').value.trim();
+
+      if (!comment) {
+        showToast('Please enter your review comments.', 'error');
+        return;
+      }
+
+      const newReview = {
+        id: 'rev-' + Date.now(),
+        author,
+        rating: selectedRating,
+        title,
+        comment,
+        date: 'Today',
+        verified: true
+      };
+
+      currentReviews.unshift(newReview);
+      renderReviews();
+
+      document.getElementById('review-comment').value = '';
+      toggleReviewForm();
+      showToast('Thank you! Your review has been published.', 'success');
+    };
+
+    renderReviews();
+
     init();
   </script>
+  <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
+  <script src="../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

@@ -452,6 +452,7 @@
   aspect-ratio: 3/4;
   overflow: hidden;
   background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .product-card-image img {
@@ -467,11 +468,13 @@
 
 .product-card-badges {
   position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
+  top: 10px;
+  left: 10px;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  z-index: 3;
 }
 
 .product-card-actions {

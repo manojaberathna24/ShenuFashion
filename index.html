@@ -13,7 +13,7 @@
   <meta property="og:type" content="website" />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/main.css?v=25" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/pages.css" />
 
@@ -22,6 +22,34 @@
 
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -51,11 +79,17 @@
         <li><a href="pages/products.html" class="nav-link">Products</a></li>
         <li><a href="pages/products.html?cat=women" class="nav-link">Women</a></li>
         <li><a href="pages/products.html?cat=men" class="nav-link">Men</a></li>
-        <li><a href="pages/products.html?cat=accessories" class="nav-link">Accessories</a></li>
+        <li><a href="pages/orders.html" class="nav-link">My Orders</a></li>
+        <li><a href="pages/track-order.html" class="nav-link" style="color:var(--color-gold); font-weight:600;">Track Order</a></li>
       </ul>
 
       <!-- Actions -->
       <div class="navbar-actions">
+        <!-- Light / Dark Mode Toggle -->
+        <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+          <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+        </button>
         <!-- Search -->
         <button class="navbar-icon-btn" id="search-toggle-btn" title="Search">
           <i data-lucide="search" width="18" height="18"></i>
@@ -200,23 +234,23 @@
           </div>
         </div>
 
-        <!-- Visual -->
+                <!-- Visual -->
         <div class="hero-visual">
-          <!-- Card 1 -->
+          <!-- Card 1 (Left Model) -->
           <div class="hero-card card-1 animate-float">
-            <div class="card-glass" style="padding:4px;">
-              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Fashion Model" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-xl);" />
+            <div class="card-glass">
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Fashion Model" />
             </div>
           </div>
           
-          <!-- Card 2 (Main) -->
+          <!-- Card 2 (Center Main Collection) -->
           <div class="hero-card card-2 animate-float" style="animation-delay: 0.2s;">
-            <div class="card-glass" style="padding:6px; display:flex; flex-direction:column;">
-              <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80" alt="Fashion Collection" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-lg); flex:1;" />
+            <div class="card-glass">
+              <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80" alt="Fashion Collection" />
             </div>
-            <!-- Floating badge -->
-            <div class="glass-badge" style="position:absolute; top:20px; left:-30px;">
-              <div class="badge-icon"><i data-lucide="zap" width="16" height="16"></i></div>
+            <!-- Floating Badge: Fast Delivery -->
+            <div class="glass-badge badge-delivery">
+              <div class="badge-icon badge-icon-delivery"><i data-lucide="zap" width="18" height="18"></i></div>
               <div>
                 <div class="badge-title">Fast Delivery</div>
                 <div class="badge-subtitle">2-3 Business Days</div>
@@ -224,14 +258,14 @@
             </div>
           </div>
 
-          <!-- Card 3 -->
+          <!-- Card 3 (Right Men Fashion) -->
           <div class="hero-card card-3 animate-float" style="animation-delay: 0.4s;">
-            <div class="card-glass" style="padding:4px;">
-               <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=600&q=80" alt="Men Fashion" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-xl);" />
+            <div class="card-glass">
+               <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=600&q=80" alt="Men Fashion" />
             </div>
-            <!-- Floating badge -->
-            <div class="glass-badge" style="position:absolute; bottom:20px; right:-30px;">
-              <div class="badge-icon" style="background:rgba(233,69,96,0.1); color:var(--color-accent);"><i data-lucide="shield-check" width="16" height="16"></i></div>
+            <!-- Floating Badge: Secure Payment -->
+            <div class="glass-badge badge-security">
+              <div class="badge-icon badge-icon-security"><i data-lucide="shield-check" width="18" height="18"></i></div>
               <div>
                 <div class="badge-title">Secure Payment</div>
                 <div class="badge-subtitle">100% Protected</div>
@@ -254,7 +288,7 @@
             <i data-lucide="truck" width="24" height="24"></i>
           </div>
           <div class="feature-card-title">Free Shipping</div>
-          <div class="feature-card-desc">Free delivery on orders over LKR 5,000</div>
+          <div class="feature-card-desc">Free delivery on orders over Rs. 5,000</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
@@ -380,8 +414,8 @@
                 <span style="color:var(--color-gold);">★★★★</span>★ <span class="rating-count">(24)</span>
               </div>
               <div class="product-card-price">
-                <span class="price-current">LKR 4,500</span>
-                <span class="price-original">LKR 5,600</span>
+                <span class="price-current">Rs. 4,500</span>
+                <span class="price-original">Rs. 5,600</span>
               </div>
             </div>
             <div class="product-card-footer">
@@ -406,7 +440,7 @@
                 <span style="color:var(--color-gold);">★★★★★</span> <span class="rating-count">(18)</span>
               </div>
               <div class="product-card-price">
-                <span class="price-current">LKR 8,900</span>
+                <span class="price-current">Rs. 8,900</span>
               </div>
             </div>
             <div class="product-card-footer">
@@ -434,7 +468,7 @@
                 <span style="color:var(--color-gold);">★★★★</span>★ <span class="rating-count">(56)</span>
               </div>
               <div class="product-card-price">
-                <span class="price-current">LKR 3,800</span>
+                <span class="price-current">Rs. 3,800</span>
               </div>
             </div>
             <div class="product-card-footer">
@@ -459,7 +493,7 @@
                 <span style="color:var(--color-gold);">★★★★</span><span style="color:var(--color-text-muted);">★</span> <span class="rating-count">(12)</span>
               </div>
               <div class="product-card-price">
-                <span class="price-current">LKR 5,200</span>
+                <span class="price-current">Rs. 5,200</span>
               </div>
             </div>
             <div class="product-card-footer">
@@ -706,34 +740,44 @@
       lucide.createIcons();
     }
 
-    function productCardHTML(p) {
+        function productCardHTML(p, idx = 0) {
       const discount = p.salePrice ? Math.round((1 - p.salePrice/p.price) * 100) : 0;
+      
+      // Determine real photo
+      const nameL = (p.name || '').toLowerCase();
+      let realImg = 'images/products/women_floral_dress.jpg';
+      if (nameL.includes('shirt') || nameL.includes('oxford')) realImg = 'images/products/men_oxford_shirt.jpg';
+      else if (nameL.includes('bag') || nameL.includes('crossbody')) realImg = 'images/products/bags_leather_crossbody.jpg';
+      else if (nameL.includes('blouse') || nameL.includes('silk')) realImg = 'images/products/women_silk_blouse.jpg';
+      else if (nameL.includes('dress') || nameL.includes('floral')) realImg = 'images/products/women_floral_dress.jpg';
+      else if (nameL.includes('cocktail') || nameL.includes('party')) realImg = 'images/products/women_cocktail_dress.jpg';
+      else if (nameL.includes('blazer') || nameL.includes('linen')) realImg = 'images/products/men_linen_blazer.jpg';
+      else if (nameL.includes('jacket') || nameL.includes('denim')) realImg = 'images/products/men_denim_jacket.jpg';
+      else if (nameL.includes('skirt') || nameL.includes('maxi')) realImg = 'images/products/women_maxi_skirt.jpg';
+      else if (nameL.includes('shoes') || nameL.includes('heels')) realImg = 'images/products/shoes_heels.jpg';
+      else if (nameL.includes('sneaker')) realImg = 'images/products/shoes_sneakers.jpg';
+      else if (nameL.includes('necklace') || nameL.includes('jewelry')) realImg = 'images/products/acc_gold_jewelry.jpg';
+      else if (nameL.includes('watch')) realImg = 'images/products/acc_watch_luxury.jpg';
+      else if (nameL.includes('wallet')) realImg = 'images/products/acc_leather_wallet.jpg';
+      else if (nameL.includes('hoodie')) realImg = 'images/products/men_streetwear_hoodie.jpg';
+      else if (nameL.includes('sweater')) realImg = 'images/products/women_knit_sweater.jpg';
+      else if (nameL.includes('tshirt') || nameL.includes('tee')) realImg = 'images/products/men_casual_tshirt.jpg';
+
       return `
-        <div class="product-card" onclick="window.location.href='pages/product-detail.html?id=${p.id}'">
+        <div class="product-card" onclick="window.location.href='pages/product-detail.html?id=${p.id}'" style="cursor:pointer;">
           <div class="product-card-image">
-            ${p.images?.[0]
-              ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy" />`
-              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--color-surface-2);"><i data-lucide="image" width="40" height="40" style="color:var(--color-text-faint);"></i></div>`
-            }
+            <img src="${realImg}" alt="${p.name || 'Fashion Apparel'}" loading="lazy" onerror="this.onerror=null; this.src='images/products/women_floral_dress.jpg';" style="width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform 0.5s ease;" />
             <div class="product-card-badges">
               ${p.isNew ? '<span class="badge badge-gold">New</span>' : ''}
               ${discount > 0 ? `<span class="badge badge-accent">-${discount}%</span>` : ''}
-            </div>
-            <div class="product-card-actions">
-              <button class="product-action-btn" title="Add to Wishlist" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
-                <i data-lucide="heart" width="16" height="16"></i>
-              </button>
-              <button class="product-action-btn" title="Quick View">
-                <i data-lucide="eye" width="16" height="16"></i>
-              </button>
             </div>
           </div>
           <div class="product-card-body">
             <div class="product-card-category">${p.category || 'Fashion'}</div>
             <div class="product-card-name">${p.name}</div>
             <div class="product-card-rating">
-              ${window.renderStars(p.rating || 4)}
-              <span class="rating-count">(${p.reviewCount || 0})</span>
+              <span style="color:var(--color-gold);">★★★★★</span>
+              <span class="rating-count">(${p.reviewCount || 24})</span>
             </div>
             <div class="product-card-price">
               <span class="price-current">${window.formatCurrency(p.salePrice || p.price)}</span>
@@ -741,9 +785,8 @@
             </div>
           </div>
           <div class="product-card-footer">
-            <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${p.id}')">
-              <i data-lucide="shopping-cart" width="15" height="15"></i>
-              Add to Cart
+            <button class="btn-add-cart" onclick="event.stopPropagation(); window.location.href='pages/product-detail.html?id=${p.id}'">
+              <i data-lucide="shopping-cart" width="15" height="15"></i> View Details
             </button>
           </div>
         </div>
@@ -752,12 +795,16 @@
 
     function getDemoProducts() {
       const demos = [
-        { id: 'd1', name: 'Floral Summer Dress', category: 'Women', price: 4500, salePrice: 3200, rating: 4.5, reviewCount: 24, isNew: true },
-        { id: 'd2', name: 'Classic Oxford Shirt', category: 'Men', price: 3800, rating: 4.2, reviewCount: 18 },
-        { id: 'd3', name: 'Leather Crossbody Bag', category: 'Bags', price: 8900, salePrice: 6500, rating: 4.8, reviewCount: 36 },
-        { id: 'd4', name: 'Silk Evening Blouse', category: 'Women', price: 5200, rating: 4.3, reviewCount: 12, isNew: true },
+        { id: 'd1',  name: 'Floral Summer Sundress',           category: 'Women',       price: 4500, salePrice: 3200, rating: 4.8, reviewCount: 34, isNew: true,  img: 'images/products/p_dress_floral.jpg' },
+        { id: 'd2',  name: 'Classic Oxford Cotton Shirt',       category: 'Men',         price: 3800, rating: 4.6, reviewCount: 28, img: 'images/products/p_men_shirt.jpg' },
+        { id: 'd3',  name: 'Leather Crossbody Saddle Bag',      category: 'Bags',        price: 8900, salePrice: 6500, rating: 4.9, reviewCount: 46, img: 'images/products/p_bag_saddle.jpg' },
+        { id: 'd4',  name: 'Silk Evening Elegance Blouse',      category: 'Women',       price: 5200, rating: 4.7, reviewCount: 19, isNew: true,  img: 'images/products/p_blouse_silk.jpg' },
+        { id: 'd7',  name: 'Tailored Linen Formal Blazer',      category: 'Men',         price: 7500, salePrice: 5900, rating: 4.9, reviewCount: 38, isNew: true,  img: 'images/products/p_men_blazer.jpg' },
+        { id: 'd10', name: 'Velvet Party Cocktail Dress',       category: 'Women',       price: 6800, salePrice: 5200, rating: 4.9, reviewCount: 29, img: 'images/products/p_dress_cocktail.jpg' },
+        { id: 'd15', name: 'Designer White Lifestyle Sneakers', category: 'Shoes',       price: 7200, salePrice: 5600, rating: 4.9, reviewCount: 55, isNew: true,  img: 'images/products/p_shoes_sneakers.jpg' },
+        { id: 'd6',  name: 'Gold Chain Statement Necklace',     category: 'Accessories', price: 2400, salePrice: 1800, rating: 4.8, reviewCount: 52, img: 'images/products/p_acc_necklace.jpg' }
       ];
-      return demos.map(productCardHTML).join('');
+      return demos.map((p, idx) => productCardHTML(p, idx)).join('');
     }
 
     loadFeaturedProducts();
@@ -817,12 +864,23 @@
     });
   </script>
 
-  <script src="js/app.js" type="module"></script>
+  <script src="js/app.js?v=25" type="module"></script>
   <script>
     // Init Lucide icons
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
     });
   </script>
+  <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
+  <script src="js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

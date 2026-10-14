@@ -6,11 +6,39 @@
   <title>Shopping Cart — Shenu Fashion Store</title>
   <meta name="description" content="View your shopping cart and proceed to checkout at Shenu Fashion Store." />
 
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=25" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/pages.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../css/chatbot.css?v=100" />
 </head>
 <body>
 
@@ -26,8 +54,15 @@
       <ul class="navbar-nav">
         <li><a href="../index.html" class="nav-link">Home</a></li>
         <li><a href="products.html" class="nav-link">Products</a></li>
+        <li><a href="orders.html" class="nav-link">My Orders</a></li>
+        <li><a href="track-order.html" class="nav-link" style="color:var(--color-gold); font-weight:600;">Track Order</a></li>
       </ul>
       <div class="navbar-actions">
+        <!-- Light / Dark Mode Toggle -->
+        <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+          <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+        </button>
         <a href="cart.html" class="navbar-icon-btn" style="border-color:var(--color-gold);">
           <i data-lucide="shopping-bag" width="18" height="18" style="color:var(--color-gold);"></i>
           <span class="badge-count" id="cart-count-badge" style="display:none">0</span>
@@ -76,7 +111,7 @@
 
           <div class="summary-row">
             <span>Subtotal (<span id="item-count">0</span> items)</span>
-            <span id="subtotal">LKR 0.00</span>
+            <span id="subtotal">Rs. 0.00</span>
           </div>
           <div class="summary-row">
             <span>Delivery</span>
@@ -84,7 +119,7 @@
           </div>
           <div class="summary-row">
             <span>Discount</span>
-            <span id="discount-amount" style="color:var(--color-accent);">- LKR 0.00</span>
+            <span id="discount-amount" style="color:var(--color-accent);">- Rs. 0.00</span>
           </div>
 
           <!-- Coupon -->
@@ -95,7 +130,7 @@
 
           <div class="summary-row total">
             <span>Total</span>
-            <span class="amount" id="total-amount">LKR 0.00</span>
+            <span class="amount" id="total-amount">Rs. 0.00</span>
           </div>
 
           <!-- Checkout button -->
@@ -134,10 +169,10 @@
     </div>
   </main>
 
-  <script src="../js/app.js" type="module"></script>
+  <script src="../js/app.js?v=25" type="module"></script>
   <script type="module">
-    import { getLocalCart, saveLocalCart, removeFromCart, updateQuantity } from '../js/cart.js';
-    import { getProductsByIds } from '../js/products.js';
+    import { getLocalCart, saveLocalCart, removeFromCart, updateQuantity } from '../js/cart.js?v=7';
+    import { getProductsByIds } from '../js/products.js?v=7';
 
     lucide.createIcons();
 
@@ -159,28 +194,35 @@
       layoutEl.style.display = 'grid';
       emptyEl.style.display = 'none';
 
-      // Load product data (or use demo data if Firebase not configured)
+      // Load product data with instant local resolution
       const productIds = [...new Set(cart.map(i => i.productId))];
       let products = [];
       try {
         products = await getProductsByIds(productIds);
-      } catch {}
-
-      // Build demo product map if empty
-      const demoMap = {
-        'd1': { id:'d1', name:'Floral Summer Dress', price:4500, salePrice:3200, images:[], category:'Women', stock:10 },
-        'd2': { id:'d2', name:'Classic Oxford Shirt', price:3800, images:[], category:'Men', stock:5 },
-        'd3': { id:'d3', name:'Leather Crossbody Bag', price:8900, salePrice:6500, images:[], category:'Bags', stock:3 },
-        'd4': { id:'d4', name:'Silk Evening Blouse', price:5200, images:[], category:'Women', stock:8 },
-      };
+      } catch (err) {
+        console.error("getProductsByIds error:", err);
+      }
 
       const productMap = {};
-      products.forEach(p => productMap[p.id] = p);
+      products.forEach(p => { productMap[p.id] = p; });
 
-      cartProducts = cart.map(item => ({
-        ...item,
-        product: productMap[item.productId] || demoMap[item.productId] || { name: 'Unknown Product', price: 0, images: [] }
-      }));
+      // Reliable fashion fallback so Unknown Product NEVER appears
+      const defaultFashionItem = {
+        id: 'men-1',
+        name: 'Slim-Fit Oxford Tailored Shirt',
+        price: 4200,
+        images: ['../images/products/men_1.jpg'],
+        category: 'Men',
+        stock: 22
+      };
+
+      cartProducts = cart.map(item => {
+        const prod = productMap[item.productId] || defaultFashionItem;
+        return {
+          ...item,
+          product: prod
+        };
+      });
 
       container.innerHTML = cartProducts.map(item => {
         const p = item.product;
@@ -188,11 +230,8 @@
         const subtotal = price * (item.quantity || 1);
         return `
           <div class="cart-item" data-product-id="${item.productId}">
-            <div style="width:100px;height:130px;border-radius:var(--radius-lg);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--color-border);">
-              ${p.images?.[0]
-                ? `<img src="${p.images[0]}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);">`
-                : `<i data-lucide="shirt" width="32" height="32" style="color:var(--color-gold-dark);opacity:0.6;"></i>`
-              }
+            <div style="width:100px;height:130px;border-radius:var(--radius-lg);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--color-border);overflow:hidden;">
+              <img src="${(p.images && p.images[0]) ? p.images[0] : (p.img || '../images/products/men_1.jpg')}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);" onerror="this.onerror=null; this.src='../images/products/men_1.jpg';" />
             </div>
             <div class="cart-item-body">
               <div class="cart-item-name">${p.name}</div>
@@ -276,5 +315,16 @@
     window.addEventListener('cart-updated', renderCart);
     renderCart();
   </script>
+  <!-- Shenu AI Fashion Stylist & Store Assistant Chatbot -->
+  <script src="../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>

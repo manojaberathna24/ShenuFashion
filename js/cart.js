@@ -31,6 +31,7 @@ export function saveLocalCart(cart) {
 }
 
 /** Add item to cart */
+window.addToCart = function(productId, quantity = 1, size = null, color = null) { return addToCart(productId, quantity, size, color); };
 export function addToCart(productId, quantity = 1, size = null, color = null) {
   const cart = getLocalCart();
   const existingIdx = cart.findIndex(

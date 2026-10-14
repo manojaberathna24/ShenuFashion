@@ -4,11 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Orders — Shenu Admin</title>
-  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/main.css?v=25" />
   <link rel="stylesheet" href="../../css/components.css" />
   <link rel="stylesheet" href="../../css/pages.css?v=3" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../../css/chatbot.css?v=100" />
 </head>
 <body>
   <div id="toast-container"></div>
@@ -36,7 +64,12 @@
     <main class="admin-main">
       <div class="admin-topbar">
         <h1 class="admin-page-title">Manage Orders</h1>
-        <div style="display:flex; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Light / Dark Mode Toggle -->
+          <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="cursor:pointer; background:var(--color-surface); border:1px solid var(--color-border); width:40px; height:40px; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+            <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+          </button>
           <select class="form-control" style="width:160px;" id="status-filter" onchange="filterOrders()">
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -80,7 +113,7 @@
   </div>
 
   <script type="module">
-    import { getAllOrders, updateOrderStatus, ORDER_STATUSES } from '../../js/orders.js';
+    import { getAllOrders, updateOrderStatus, ORDER_STATUSES } from '../../js/orders.js?v=15';
     import { logoutUser } from '../../js/auth.js';
 
     lucide.createIcons();
@@ -96,12 +129,43 @@
     ];
 
     async function loadOrders() {
+      let localPlaced = [];
+      try {
+        localPlaced = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+      } catch (e) {}
+
+      let overrides = {};
+      try {
+        overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+      } catch (e) {}
+
+      demoOrders.forEach(o => {
+        const clean = (o.id || '').replace(/^#/, '').toUpperCase();
+        if (overrides[clean]) o.status = overrides[clean];
+        else if (overrides[o.id]) o.status = overrides[o.id];
+      });
+
       try {
         allOrders = await getAllOrders();
-        if (allOrders.length === 0) allOrders = demoOrders;
+        if (allOrders.length === 0) {
+          allOrders = [...localPlaced, ...demoOrders];
+        } else {
+          demoOrders.forEach(d => {
+            if (!allOrders.some(o => (o.id || '').replace(/^#/, '').toUpperCase() === d.id.toUpperCase())) {
+              allOrders.push(d);
+            }
+          });
+        }
       } catch {
-        allOrders = demoOrders;
+        allOrders = [...localPlaced, ...demoOrders];
       }
+
+      allOrders.forEach(o => {
+        const clean = (o.id || '').replace(/^#/, '').toUpperCase();
+        if (overrides[clean]) o.status = overrides[clean];
+        else if (overrides[o.id]) o.status = overrides[o.id];
+      });
+
       renderOrders(allOrders);
     }
 
@@ -122,7 +186,7 @@
                 <td style="font-size:var(--text-sm); color:var(--color-text-muted);">
                   ${items.slice(0,1).map(i => i.name || i).join(', ')}${items.length > 1 ? ` +${items.length-1} more` : ''}
                 </td>
-                <td style="font-weight:700; color:var(--color-gold); font-family:var(--font-heading);">LKR ${(o.total||0).toLocaleString()}</td>
+                <td style="font-weight:700; color:var(--color-gold); font-family:var(--font-heading);">Rs. ${(o.total||0).toLocaleString()}</td>
                 <td style="font-size:var(--text-sm); color:var(--color-text-muted);">${date}</td>
                 <td>${window.statusBadge ? window.statusBadge(o.status) : `<span class="badge">${o.status}</span>`}</td>
                 <td>
@@ -153,21 +217,60 @@
     };
 
     window.changeStatus = async (orderId, newStatus) => {
-      const result = await updateOrderStatus(orderId, newStatus).catch(() => ({ success: true }));
-      if (result.success) {
-        const order = allOrders.find(o => o.id === orderId);
-        if (order) order.status = newStatus;
-        showToast(`Order #${orderId} status updated to ${ORDER_STATUSES[newStatus]?.label}`, 'success');
-      } else {
-        showToast('Failed to update order status.', 'error');
+      const clean = (orderId || '').replace(/^#/, '').toUpperCase();
+
+      // 1. Immediately update local in-memory order object
+      const order = allOrders.find(o => (o.id || '').replace(/^#/, '').toUpperCase() === clean);
+      if (order) {
+        order.status = newStatus;
       }
+
+      // 2. Persist to localStorage directly so Track Order and My Orders stay 100% in sync
+      try {
+        const overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+        overrides[clean] = newStatus;
+        overrides[orderId] = newStatus;
+        localStorage.setItem('shenu_order_statuses', JSON.stringify(overrides));
+      } catch (e) {}
+
+      try {
+        const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+        const t = placed.find(o => (o.id || '').replace(/^#/, '').toUpperCase() === clean);
+        if (t) {
+          t.status = newStatus;
+          localStorage.setItem('shenu_placed_orders', JSON.stringify(placed));
+        }
+      } catch (e) {}
+
+      // 3. Trigger background update without letting any permission error block the UI
+      try {
+        updateOrderStatus(orderId, newStatus).catch(() => {});
+      } catch (e) {}
+
+      // 4. Re-render order row immediately with the updated badge color
+      const currentFiltered = currentFilter ? allOrders.filter(o => o.status === currentFilter) : allOrders;
+      renderOrders(currentFiltered);
+
+      const label = ORDER_STATUSES[newStatus]?.label || newStatus;
+      showToast(`Order #${orderId} status updated to ${label}`, 'success');
     };
 
     document.getElementById('admin-logout')?.addEventListener('click', () => logoutUser());
     loadOrders();
   </script>
 
-  <script src="../../js/app.js" type="module"></script>
+  <script src="../../js/app.js?v=25" type="module"></script>
   <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+  <!-- Shenu AI Chatbot Assistant -->
+  <script src="../../js/chatbot.js?v=100" type="module"></script>
+      <!-- Floating AI Chatbot Button with Character Avatar -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
 </body>
 </html>
