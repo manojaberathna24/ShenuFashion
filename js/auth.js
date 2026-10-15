@@ -172,10 +172,10 @@ function saveGoogleAccount(account) {
 }
 
 export async function loginWithGoogle() {
-  // signInWithPopup shows Google's REAL account chooser (all signed-in browser accounts).
-  // Domain manojaberathna24.github.io is now in Firebase Authorized Domains → popup works.
-  // If browser blocks popup → signInWithRedirect (full page Google chooser).
-  // If user deliberately closes popup → just toast, no fake modal.
+  if (window.location.protocol === 'file:') {
+    showToast('Cannot sign in from file:// path. Please open via http://localhost:3000 or GitHub Pages.', 'error');
+    return { success: false };
+  }
 
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -184,32 +184,41 @@ export async function loginWithGoogle() {
     return { success: true };
   } catch (err) {
     const code = err?.code || '';
-    console.warn('Google Sign-In error:', code);
+    const message = err?.message || '';
+    console.warn('Google Sign-In error:', code, message);
 
-    // User deliberately closed the popup → just notify, don't show modal
+    // User closed popup
     if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
       showToast('Google Sign-In cancelled. Try again.', 'info');
       return { success: false };
     }
 
-    // Browser blocked the popup → use full-page redirect (shows real Google accounts)
-    if (
-      code === 'auth/popup-blocked' ||
-      code === 'auth/unauthorized-domain' ||
-      code === 'auth/operation-not-supported-in-this-environment' ||
-      code === 'auth/web-storage-unsupported'
-    ) {
+    // Domain not authorized in Firebase Console
+    if (code === 'auth/unauthorized-domain') {
+      const host = window.location.hostname || 'this domain';
+      showToast('Domain unauthorized: Add ' + host + ' in Firebase Console > Auth > Settings > Authorized domains', 'error');
+      return { success: false };
+    }
+
+    // Browser blocked the popup window -> try redirect
+    if (code === 'auth/popup-blocked') {
       try {
-        showToast('Redirecting to Google...', 'info');
+        showToast('Popup blocked by browser. Redirecting to Google...', 'info');
         await signInWithRedirect(auth, googleProvider);
         return { success: true };
       } catch (redirectErr) {
-        console.warn('Redirect failed too:', redirectErr);
+        showToast('Browser blocked redirect. Please allow popups for this site.', 'error');
+        return { success: false };
       }
     }
 
-    // Absolute last resort (completely offline / network error)
-    showToast('Google Sign-In failed. Please check your connection.', 'error');
+    // AdBlocker / Brave Shields / Network blocked
+    if (code === 'auth/network-request-failed') {
+      showToast('Network request blocked. Please check connection or turn off AdBlockers/Brave shields.', 'error');
+      return { success: false };
+    }
+
+    showToast('Google Sign-In error: ' + (code || message), 'error');
     return { success: false };
   }
 }
