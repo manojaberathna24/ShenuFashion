@@ -30,17 +30,21 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
     if (result && result.user) {
       const user = result.user;
       // Handle user data and UI after redirect from Google
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', user.uid), {
-          name: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          role: 'customer',
-          addresses: [],
-          wishlist: [],
-          createdAt: serverTimestamp(),
-        });
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', user.uid), {
+            name: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            role: 'customer',
+            addresses: [],
+            wishlist: [],
+            createdAt: serverTimestamp(),
+          });
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore redirect sync warning:', firestoreErr);
       }
       const acc = {
         uid: user.uid, displayName: user.displayName,
@@ -112,16 +116,20 @@ export async function registerUser(name, email, password) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
 
-    // Create user document in Firestore
-    await setDoc(doc(db, 'users', cred.user.uid), {
-      name,
-      email,
-      photoURL: null,
-      role: 'customer',
-      addresses: [],
-      wishlist: [],
-      createdAt: serverTimestamp(),
-    });
+    // Create user document in Firestore (graceful fallback)
+    try {
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        name,
+        email,
+        photoURL: null,
+        role: 'customer',
+        addresses: [],
+        wishlist: [],
+        createdAt: serverTimestamp(),
+      });
+    } catch (firestoreErr) {
+      console.warn('Firestore register profile sync warning:', firestoreErr);
+    }
 
     showToast('Account created successfully! Welcome to Shenu Fashion! 🎉', 'success');
     setTimeout(() => { window.location.href = '../index.html'; }, 1200);
@@ -224,18 +232,24 @@ export async function loginWithGoogle() {
 }
 
 async function _handleGoogleUser(user) {
-  const userDoc = await getDoc(doc(db, 'users', user.uid));
-  if (!userDoc.exists()) {
-    await setDoc(doc(db, 'users', user.uid), {
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      role: 'customer',
-      addresses: [],
-      wishlist: [],
-      createdAt: serverTimestamp(),
-    });
+  // Sync to Firestore if permissions allow, but never block login
+  try {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      await setDoc(doc(db, 'users', user.uid), {
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        role: 'customer',
+        addresses: [],
+        wishlist: [],
+        createdAt: serverTimestamp(),
+      });
+    }
+  } catch (firestoreErr) {
+    console.warn('Firestore user profile sync warning (proceeding with login):', firestoreErr);
   }
+
   const acc = {
     uid: user.uid,
     displayName: user.displayName,
