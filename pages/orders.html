@@ -123,6 +123,17 @@
         <div class="skeleton" style="height:160px; border-radius:var(--radius-xl);"></div>
       </div>
 
+            <!-- Not Logged In State -->
+      <div class="empty-state" id="not-logged-in-orders" style="display:none;">
+        <div class="empty-state-icon"><i data-lucide="lock" width="36" height="36"></i></div>
+        <div class="empty-state-title">Sign In to View Your Orders</div>
+        <div class="empty-state-description">Please log in to your account to view the orders you have placed.</div>
+        <a href="login.html" class="btn btn-primary btn-lg" style="margin-top:16px;">
+          <i data-lucide="log-in" width="18" height="18"></i>
+          Sign In Now
+        </a>
+      </div>
+
       <!-- Empty state -->
       <div class="empty-state" id="empty-orders" style="display:none;">
         <div class="empty-state-icon"><i data-lucide="package" width="36" height="36"></i></div>
@@ -183,27 +194,31 @@
     let allOrders = [];
     let currentFilter = 'all';
 
-    // Demo orders for display when Firebase not configured
-    const demoOrders = [
-      { id:'ORD-001234', status:'delivered', createdAt:{ toDate:()=>new Date('2026-08-01') }, total:11700, items:[{name:'Floral Summer Dress', quantity:1, price:3200},{name:'Leather Crossbody Bag', quantity:1, price:6500}], shippingAddress:{firstName:'Ashan', city:'Colombo'} },
-      { id:'ORD-001187', status:'shipped',   createdAt:{ toDate:()=>new Date('2026-08-15') }, total:3800, items:[{name:'Classic Oxford Shirt', quantity:1, price:3800}], shippingAddress:{firstName:'Ashan', city:'Gampaha'} },
-      { id:'ORD-001056', status:'pending',   createdAt:{ toDate:()=>new Date('2026-08-25') }, total:5200, items:[{name:'Silk Evening Blouse', quantity:1, price:5200}], shippingAddress:{firstName:'Ashan', city:'Colombo'} },
-    ];
-
     onAuthStateChanged(auth, async (user) => {
+      const container = document.getElementById('orders-container');
+      const emptyEl = document.getElementById('empty-orders');
+      const notLoggedEl = document.getElementById('not-logged-in-orders');
+      const skeletons = document.getElementById('orders-skeleton');
+
       if (!user) {
-        // Show demo orders if not logged in
-        allOrders = demoOrders;
-        renderOrders(allOrders);
+        if (skeletons) skeletons.style.display = 'none';
+        if (container) container.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (notLoggedEl) notLoggedEl.style.display = 'flex';
+        document.getElementById('orders-count').textContent = 'Please sign in to view orders';
+        lucide.createIcons();
         return;
       }
 
+      if (notLoggedEl) notLoggedEl.style.display = 'none';
+
       try {
         allOrders = await getUserOrders();
-        if (allOrders.length === 0) allOrders = demoOrders; // fallback
-      } catch {
-        allOrders = demoOrders;
+      } catch (err) {
+        allOrders = [];
       }
+
+      if (skeletons) skeletons.style.display = 'none';
       renderOrders(allOrders);
     });
 

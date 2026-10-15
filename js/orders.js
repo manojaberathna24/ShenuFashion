@@ -92,26 +92,59 @@ export async function createOrder(orderData) {
 // GET USER ORDERS
 // ============================================================
 export async function getUserOrders(limitCount = 20) {
-  let localOrders = [];
-  try {
-    localOrders = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
-  } catch (e) {}
   const user = auth.currentUser;
-  if (!user) return localOrders;
+  if (!user) return [];
 
+  const userEmail = (user.email || '').toLowerCase().trim();
+  const userId = user.uid;
+
+  let combined = [];
+
+  // 1. Fetch from Firestore for this specific logged-in user
   try {
     const q = query(
       collection(db, 'orders'),
-      where('userId', '==', user.uid),
+      where('userId', '==', userId),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!snap.empty) {
+      combined = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
   } catch (error) {
-    console.error('Error fetching orders:', error);
-    return [];
+    console.warn('Firestore orders fetch notice:', error);
   }
+
+  // 2. Fetch locally stored orders placed by this specific account
+  try {
+    const local = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+    const userLocal = local.filter(o => {
+      if (!o) return false;
+      // Strip out any legacy dummy Ashan orders
+      if (o.id && (o.id === 'ORD-001234' || o.id === 'ORD-001187' || o.id === 'ORD-001056')) return false;
+      if (o.shippingAddress?.firstName === 'Ashan') return false;
+
+      const matchId = o.userId && o.userId === userId;
+      const matchEmail = o.userEmail && o.userEmail.toLowerCase().trim() === userEmail;
+      return matchId || matchEmail;
+    });
+
+    for (const locOrder of userLocal) {
+      if (!combined.some(o => o.id === locOrder.id)) {
+        combined.push(locOrder);
+      }
+    }
+  } catch (e) {}
+
+  // 3. Sort descending by date
+  combined.sort((a, b) => {
+    const tA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+    const tB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+    return tB - tA;
+  });
+
+  return combined;
 }
 
 // ============================================================
