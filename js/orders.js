@@ -6,7 +6,7 @@
 import { db, auth } from './firebase-config.js';
 import {
   collection, doc, addDoc, getDoc, getDocs,
-  updateDoc, query, where, orderBy, limit, serverTimestamp
+  updateDoc, deleteDoc, query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ============================================================
@@ -298,6 +298,51 @@ export async function updateOrderStatus(orderId, newStatus, note = '') {
   // Dispatch event so other open pages (Track Order, My Orders) know order status changed!
   try {
     window.dispatchEvent(new CustomEvent('order-status-updated', { detail: { orderId, newStatus } }));
+  } catch (e) {}
+
+  return { success: true };
+}
+
+// ============================================================
+// ADMIN: DELETE ORDER
+// Permanently removes order from local cache & Firestore
+// ============================================================
+export async function deleteOrder(orderId) {
+  if (!orderId) return { success: true };
+  const cleanId = orderId.replace(/^#/, '').trim().toUpperCase();
+
+  // 1. Remove from local placed orders
+  try {
+    const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+    const filtered = placed.filter(o => {
+      const oid = (o.id || o.orderId || '').replace(/^#/, '').trim().toUpperCase();
+      return oid !== cleanId && oid !== orderId.toUpperCase();
+    });
+    localStorage.setItem('shenu_placed_orders', JSON.stringify(filtered));
+  } catch (e) {}
+
+  // 2. Track in shenu_deleted_orders & remove from status overrides
+  try {
+    const statusOverrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+    delete statusOverrides[cleanId];
+    delete statusOverrides[orderId];
+    localStorage.setItem('shenu_order_statuses', JSON.stringify(statusOverrides));
+
+    const deletedOrders = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
+    if (!deletedOrders.includes(cleanId)) deletedOrders.push(cleanId);
+    if (!deletedOrders.includes(orderId)) deletedOrders.push(orderId);
+    localStorage.setItem('shenu_deleted_orders', JSON.stringify(deletedOrders));
+  } catch (e) {}
+
+  // 3. Delete from Firestore if exists
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    deleteDoc(orderRef).catch(() => {});
+  } catch (err) {}
+
+  // 4. Dispatch global deletion event
+  try {
+    window.dispatchEvent(new CustomEvent('order-deleted', { detail: { orderId } }));
   } catch (e) {}
 
   return { success: true };

@@ -4116,13 +4116,55 @@
   function lookupOrder(query) {
     if (!query) return null;
     const clean = query.replace(/[#\s]/g, '').toUpperCase();
-    
+
+    // 0. Check if order was permanently deleted in Admin
+    let deletedOrders = [];
+    try {
+      deletedOrders = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
+    } catch(e) {}
+
+    for (const dId of deletedOrders) {
+      const cleanD = (dId || '').replace(/[#\s-]/g, '').toUpperCase();
+      const numOnly = (dId || '').replace(/\D/g, '');
+      if (clean === cleanD || clean.includes(cleanD) || cleanD.includes(clean) || (numOnly && clean.includes(numOnly))) {
+        return { deleted: true, id: dId.replace(/^#/, '') };
+      }
+    }
+
+    // Helper to get real live status overrides from Admin operations
+    function getLiveStatus(id, defaultStatus) {
+      try {
+        const overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+        const cleanId = (id || '').replace(/[#\s-]/g, '').toUpperCase();
+        for (const k in overrides) {
+          const cleanK = k.replace(/[#\s-]/g, '').toUpperCase();
+          if (cleanK === cleanId || cleanK.includes(cleanId) || cleanId.includes(cleanK)) {
+            return overrides[k];
+          }
+        }
+      } catch(e) {}
+      return defaultStatus;
+    }
+
+    function getCourierForStatus(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'pending') return 'Colombo Warehouse (Order Received & Pending Processing)';
+      if (s === 'processing') return 'Fulfillment Center (Quality Check & Processing)';
+      if (s === 'shipped') return 'Pronto Delivery (In Transit to Central Hub)';
+      if (s === 'delivered') return 'PromptX Courier (Delivered to Recipient)';
+      if (s === 'cancelled') return 'Order Cancelled (No Dispatch / Processing)';
+      return 'PromptX Courier Logistics';
+    }
+
     // Check DEMO_ORDERS
     for (const key in DEMO_ORDERS) {
       const cleanKey = key.replace(/[#\s-]/g, '').toUpperCase();
       const numOnly = key.replace(/\D/g, '');
       if (clean.includes(cleanKey) || cleanKey.includes(clean) || (numOnly && clean.includes(numOnly))) {
-        return DEMO_ORDERS[key];
+        const ord = { ...DEMO_ORDERS[key] };
+        ord.status = getLiveStatus(ord.id, ord.status);
+        ord.courier = getCourierForStatus(ord.status);
+        return ord;
       }
     }
 
@@ -4133,16 +4175,30 @@
         const ordId = (ord.orderId || ord.id || '').replace(/[#\s-]/g, '').toUpperCase();
         const numOnly = (ord.orderId || ord.id || '').replace(/\D/g, '');
         if (clean.includes(ordId) || ordId.includes(clean) || (numOnly && clean.includes(numOnly))) {
+          const liveSt = getLiveStatus(ord.orderId || ord.id, ord.status || 'processing');
+          let itemsText = 'Fashion Apparel';
+          if (Array.isArray(ord.items) && ord.items.length > 0) {
+            itemsText = ord.items.map(i => {
+              if (typeof i === 'string') return i;
+              return i.title || i.name || i.productTitle || i.productName || 'Fashion Item';
+            }).join(', ');
+          }
+          let dateStr = 'Recent';
+          if (ord.createdAt?.toDate) dateStr = ord.createdAt.toDate().toLocaleDateString();
+          else if (ord.date) dateStr = new Date(ord.date).toLocaleDateString();
+
+          const cust = (ord.shipping?.firstName ? `${ord.shipping.firstName} ${ord.shipping.lastName || ''}`.trim() : (ord.shippingAddress?.firstName ? `${ord.shippingAddress.firstName} ${ord.shippingAddress.lastName || ''}`.trim() : (ord.userName || 'Customer')));
+
           return {
             id: ord.orderId || ord.id,
-            status: ord.status || 'processing',
-            date: ord.date ? new Date(ord.date).toLocaleDateString() : 'Recent',
-            customer: (ord.shipping?.firstName ? `${ord.shipping.firstName} ${ord.shipping.lastName}` : (ord.userName || 'Valued Shopper')),
-            city: ord.shipping?.city || ord.city || 'Sri Lanka',
-            address: ord.shipping?.address1 || 'Standard Shipping Address',
-            phone: ord.shipping?.phone || '+94 77 000 0000',
-            courier: 'PromptX Courier (Tracking ID Assigned)',
-            items: ord.items ? ord.items.map(i => i.name || 'Fashion Item').join(', ') : 'Fashion Apparel',
+            status: liveSt,
+            date: dateStr,
+            customer: cust,
+            city: ord.shipping?.city || ord.shippingAddress?.city || ord.city || 'Sri Lanka',
+            address: ord.shipping?.address1 || ord.shippingAddress?.address1 || 'Standard Shipping Address',
+            phone: ord.shipping?.phone || ord.shippingAddress?.phone || '+94 77 000 0000',
+            courier: getCourierForStatus(liveSt),
+            items: itemsText,
             subtotal: `Rs. ${(ord.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
             total: `Rs. ${(ord.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
             paymentMethod: ord.paymentMethod || 'Online Payment'
@@ -4152,18 +4208,18 @@
     } catch(e) {}
 
     // Fallback if 4-6 digits provided specifically in tracking context
-    const digitMatch = query.match(/\b(\d{4,6})\b/);
+    const digitMatch = query.match(/(\d{4,6})/);
     if (digitMatch) {
       const num = digitMatch[1];
       const synOrder = {
         id: `ORD-00${num}`,
-        status: 'shipped',
+        status: getLiveStatus(`ORD-00${num}`, 'shipped'),
         date: 'Oct 14, 2026',
         customer: 'Kamal Gunaratne',
         city: 'Maharagama, Colombo',
         address: '45 Temple Road, Maharagama',
         phone: '+94 71 892 4355',
-        courier: 'PromptX Express Logistics (Out for Delivery Today)',
+        courier: getCourierForStatus(getLiveStatus(`ORD-00${num}`, 'shipped')),
         items: 'Luxe Satin Cocktail Party Dress',
         subtotal: 'Rs. 6,800.00',
         total: 'Rs. 6,800.00',
@@ -4587,6 +4643,31 @@
     }
 
     // ------------------------------------------------------------
+    // INTENT: CATALOG SIZE & TOTAL PRODUCTS ("how many items have in this shenu fashion", "total items", "products keeyak thiyenawada")
+    // ------------------------------------------------------------
+    if (/how many (items|products|clothes)|total (items|products)|catalog (size|count)|items (count|ganana|keeyak)|products keeyak|adum keeyak|koccara items/i.test(q)) {
+      return `
+        <p>✨ <strong>Shenu Fashion Catalog Intelligence:</strong></p>
+        <p style="font-size:13px; line-height:1.6; margin:6px 0 10px 0;">
+          Shenu Fashion features a curated luxury collection of <strong>150 designer apparel & accessory items</strong> across 6 core collections:
+        </p>
+        <ul style="margin:0 0 12px 18px; padding:0; font-size:12.5px; line-height:1.8;">
+          <li>👗 <strong>Women's Collection:</strong> 50 items (Party dresses, formal wear, silk sarees, kurtis)</li>
+          <li>👔 <strong>Men's Collection:</strong> 25 items (Oxford shirts, slim trousers, linen kurtas, blazers)</li>
+          <li>💃 <strong>Dresses Collection:</strong> 25 items (Silk slip dresses, evening gowns, floral maxis)</li>
+          <li>✨ <strong>Jewelry & Accessories:</strong> 25 items (18K gold-plated chains, earrings, belts)</li>
+          <li>👠 <strong>Footwear & Heels:</strong> 25 items (Stiletto heels, leather loafers, sandals)</li>
+          <li>👜 <strong>Luxury Handbags:</strong> 25 items (Quilted leather totes, clutches, crossbody bags)</li>
+        </ul>
+        <div style="margin-top:10px;">
+          <a href="${isAdminPage ? 'products.html' : 'pages/products.html'}" class="chat-order-track-btn" style="text-decoration:none;">
+            <span>Browse All 150 Catalog Items &rarr;</span>
+          </a>
+        </div>
+      `;
+    }
+
+    // ------------------------------------------------------------
     // INTENT 2: BUDGET & PRODUCT CATALOG SEARCH ("5000 t aduwen adumak", "under 4500 lkr", "under 7654lkr", etc.)
     // CRITICAL: Tested BEFORE order tracking so numbers are NEVER misread as orders!
     // ------------------------------------------------------------
@@ -4752,11 +4833,31 @@
       }
 
       if (targetOrder) {
+        if (targetOrder.deleted) {
+          return `
+            <p>🗑️ <strong>Order Record Deleted:</strong></p>
+            <div class="chat-order-card" style="border-left:4px solid var(--color-error); padding:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <span class="chat-order-id" style="text-decoration:line-through; color:var(--color-text-muted);">#${targetOrder.id}</span>
+                <span class="chat-order-badge badge-cancelled">DELETED</span>
+              </div>
+              <p style="font-size:12.5px; margin:0 0 8px 0; color:var(--color-error); font-weight:600;">
+                This order (#${targetOrder.id}) was permanently deleted from the database in Admin Operations.
+              </p>
+              <p style="font-size:12px; margin:0; color:var(--color-text-muted);">
+                No active fulfillment, shipment, or tracking record exists for this Order ID anymore.
+              </p>
+            </div>
+          `;
+        }
+
         currentContextOrder = targetOrder;
         let badgeClass = 'badge-pending';
-        if (targetOrder.status === 'delivered') badgeClass = 'badge-delivered';
-        else if (targetOrder.status === 'shipped') badgeClass = 'badge-shipped';
-        else if (targetOrder.status === 'processing') badgeClass = 'badge-processing';
+        const stLower = (targetOrder.status || '').toLowerCase();
+        if (stLower === 'delivered') badgeClass = 'badge-delivered';
+        else if (stLower === 'shipped') badgeClass = 'badge-shipped';
+        else if (stLower === 'processing') badgeClass = 'badge-processing';
+        else if (stLower === 'cancelled') badgeClass = 'badge-cancelled';
 
         const userObj = getLoggedInUserInfo();
         const loggedInNote = userObj?.email ? `<div style="font-size:11px; color:#10B981; margin-bottom:6px;">✓ Logged in as: ${userObj.email}</div>` : '';
@@ -4767,7 +4868,7 @@
             ${loggedInNote}
             <div class="chat-order-header">
               <span class="chat-order-id">#${targetOrder.id}</span>
-              <span class="chat-order-badge ${badgeClass}">${targetOrder.status}</span>
+              <span class="chat-order-badge ${badgeClass}">${(targetOrder.status || '').toUpperCase()}</span>
             </div>
             <div class="chat-order-details">
               <div>👤 <strong>Recipient:</strong> ${targetOrder.customer}</div>

@@ -102,6 +102,7 @@
               <th>Date</th>
               <th>Status</th>
               <th>Update Status</th>
+              <th style="text-align:center;">Actions</th>
             </tr>
           </thead>
           <tbody id="orders-tbody">
@@ -113,7 +114,7 @@
   </div>
 
   <script type="module">
-    import { getAllOrders, updateOrderStatus, ORDER_STATUSES } from '../../js/orders.js?v=15';
+    import { getAllOrders, updateOrderStatus, deleteOrder, ORDER_STATUSES } from '../../js/orders.js?v=16';
     import { logoutUser } from '../../js/auth.js';
 
     lucide.createIcons();
@@ -160,6 +161,16 @@
         allOrders = [...localPlaced, ...demoOrders];
       }
 
+      let deleted = [];
+      try {
+        deleted = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
+      } catch (e) {}
+
+      allOrders = allOrders.filter(o => {
+        const clean = (o.id || '').replace(/^#/, '').toUpperCase();
+        return !deleted.includes(clean) && !deleted.includes(o.id);
+      });
+
       allOrders.forEach(o => {
         const clean = (o.id || '').replace(/^#/, '').toUpperCase();
         if (overrides[clean]) o.status = overrides[clean];
@@ -169,22 +180,50 @@
       renderOrders(allOrders);
     }
 
+    function formatItemSummary(items) {
+      if (!items) return 'Fashion Item';
+      if (typeof items === 'string') return items;
+      if (!Array.isArray(items)) {
+        if (typeof items === 'object') {
+          return items.title || items.name || items.productName || items.productTitle || 'Fashion Item';
+        }
+        return String(items);
+      }
+      if (items.length === 0) return 'No items';
+      const first = items[0];
+      const firstName = (typeof first === 'object') 
+        ? (first.title || first.name || first.productTitle || first.productName || 'Fashion Item')
+        : String(first);
+      return firstName + (items.length > 1 ? ` +${items.length - 1} more` : '');
+    }
+
     function renderOrders(orders) {
       document.getElementById('orders-tbody').innerHTML = orders.length === 0
-        ? '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--color-text-faint);">No orders found</td></tr>'
+        ? '<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--color-text-faint);">No orders found</td></tr>'
         : orders.map(o => {
-            const info  = ORDER_STATUSES[o.status] || { label: o.status, color: '#fff' };
-            const date  = o.createdAt?.toDate ? window.formatDate(o.createdAt.toDate()) : 'N/A';
-            const items = o.items || [];
+            const info = ORDER_STATUSES[o.status] || { label: o.status, color: '#fff' };
+            let date = 'Recent';
+            if (o.createdAt?.toDate) {
+              date = window.formatDate ? window.formatDate(o.createdAt.toDate()) : o.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } else if (o.createdAt) {
+              const d = new Date(o.createdAt);
+              if (!isNaN(d.getTime())) {
+                date = window.formatDate ? window.formatDate(d) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              }
+            }
+            const customerName = o.userName || (o.shippingAddress ? `${o.shippingAddress.firstName || ''} ${o.shippingAddress.lastName || ''}`.trim() : '') || 'Customer';
+            const customerEmail = o.userEmail || o.shippingAddress?.email || '';
+            const itemsSummary = formatItemSummary(o.items);
+
             return `
               <tr>
                 <td style="font-family:var(--font-heading); font-weight:700; color:var(--color-gold);">#${o.id}</td>
                 <td>
-                  <div style="font-weight:600;font-size:var(--text-sm);">${o.userName || 'Customer'}</div>
-                  <div style="font-size:var(--text-xs);color:var(--color-text-muted);">${o.userEmail || ''}</div>
+                  <div style="font-weight:600;font-size:var(--text-sm);">${customerName}</div>
+                  <div style="font-size:var(--text-xs);color:var(--color-text-muted);">${customerEmail}</div>
                 </td>
-                <td style="font-size:var(--text-sm); color:var(--color-text-muted);">
-                  ${items.slice(0,1).map(i => i.name || i).join(', ')}${items.length > 1 ? ` +${items.length-1} more` : ''}
+                <td style="font-size:var(--text-sm); color:var(--color-text-muted); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${itemsSummary}">
+                  ${itemsSummary}
                 </td>
                 <td style="font-weight:700; color:var(--color-gold); font-family:var(--font-heading);">Rs. ${(o.total||0).toLocaleString()}</td>
                 <td style="font-size:var(--text-sm); color:var(--color-text-muted);">${date}</td>
@@ -195,6 +234,11 @@
                       `<option value="${s}" ${o.status===s ? 'selected' : ''}>${ORDER_STATUSES[s]?.label || s}</option>`
                     ).join('')}
                   </select>
+                </td>
+                <td style="text-align:center;">
+                  <button type="button" class="btn btn-sm" onclick="confirmDeleteOrder('${o.id}')" title="Delete Order" style="padding:6px 12px; border-radius:var(--radius-md); border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#ef4444; font-size:var(--text-xs); font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
+                    <i data-lucide="trash-2" width="14" height="14"></i> Delete
+                  </button>
                 </td>
               </tr>
             `;
@@ -255,6 +299,33 @@
       showToast(`Order #${orderId} status updated to ${label}`, 'success');
     };
 
+    window.confirmDeleteOrder = async (orderId) => {
+      if (!orderId) return;
+      const ok = confirm(`Are you sure you want to permanently delete order #${orderId}? This cannot be undone.`);
+      if (!ok) return;
+
+      const clean = (orderId || '').replace(/^#/, '').toUpperCase();
+
+      // 1. Persist deletion via orders.js
+      try {
+        await deleteOrder(orderId);
+      } catch (e) {}
+
+      // 2. Remove from local in-memory list
+      allOrders = allOrders.filter(o => {
+        const oid = (o.id || '').replace(/^#/, '').toUpperCase();
+        return oid !== clean && oid !== orderId.toUpperCase();
+      });
+
+      // 3. Re-render table
+      const filtered = currentFilter ? allOrders.filter(o => o.status === currentFilter) : allOrders;
+      renderOrders(filtered);
+
+      if (typeof window.showToast === 'function') {
+        showToast(`Order #${orderId} permanently deleted`, 'success');
+      }
+    };
+
     document.getElementById('admin-logout')?.addEventListener('click', () => logoutUser());
     loadOrders();
   </script>
@@ -262,7 +333,7 @@
   <script src="../../js/app.js?v=25" type="module"></script>
   <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
   <!-- Shenu AI Chatbot Assistant -->
-  <script src="../../js/chatbot.js?v=115" type="module"></script>
+  <script src="../../js/chatbot.js?v=117" type="module"></script>
       <!-- Floating AI Chatbot Button with Character Avatar -->
   <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
     <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
