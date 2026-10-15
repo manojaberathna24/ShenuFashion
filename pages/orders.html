@@ -183,6 +183,7 @@
   </div>
 
   <script type="module">
+    import { DEMO_PRODUCTS } from '../js/products.js';
     import { getUserOrders, cancelOrder, ORDER_STATUSES, renderOrderTimeline } from '../js/orders.js';
     import { generateInvoicePDF } from '../js/invoice.js';
     import { logoutUser } from '../js/auth.js';
@@ -222,6 +223,37 @@
       renderOrders(allOrders);
     });
 
+        function enrichOrderItem(item) {
+      let name = item.name || item.title || item.productTitle || item.productName || '';
+      let price = item.price || item.salePrice || 0;
+      let image = item.image || (item.images && item.images[0]) || '';
+      let category = item.category || 'Apparel';
+
+      if (!name || price === 0) {
+        const prodId = item.productId || item.id;
+        if (prodId && typeof DEMO_PRODUCTS !== 'undefined') {
+          const p = DEMO_PRODUCTS.find(dp => dp.id === prodId || (dp.id && dp.id.toLowerCase() === prodId.toLowerCase()));
+          if (p) {
+            if (!name) name = p.name || p.title;
+            if (price === 0) price = p.salePrice || p.price || 0;
+            if (!image) image = (p.images && p.images[0]) || p.img || '';
+            if (p.category) category = p.category;
+          }
+        }
+      }
+
+      if (!name) name = 'Fashion Apparel Item';
+      if (price === 0 && item.total) price = Math.round(item.total / (item.quantity || 1));
+
+      return {
+        ...item,
+        name,
+        price,
+        image,
+        category
+      };
+    }
+
     function renderOrders(orders) {
       const container = document.getElementById('orders-container');
       const emptyEl   = document.getElementById('empty-orders');
@@ -238,7 +270,8 @@
       container.innerHTML = orders.map(order => {
         const info  = ORDER_STATUSES[order.status] || ORDER_STATUSES['pending'];
         const date  = order.createdAt?.toDate ? window.formatDate(order.createdAt.toDate()) : 'N/A';
-        const items = order.items || [];
+        const rawItems = order.items && order.items.length > 0 ? order.items : [{ name: 'Fashion Apparel Item', quantity: 1, price: order.total || 0 }];
+        const items = rawItems.map(enrichOrderItem);
         return `
           <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl); padding:var(--space-5); margin-bottom:var(--space-4); transition:all 0.3s; cursor:pointer;" onmouseover="this.style.borderColor='var(--color-border-hover)'" onmouseout="this.style.borderColor='var(--color-border)'" onclick="openOrderModal('${order.id}')">
             <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
@@ -310,18 +343,32 @@
       document.getElementById('modal-order-id').textContent = `Order #${order.id}`;
       document.getElementById('modal-timeline').innerHTML = renderOrderTimeline(order);
 
-      const items = order.items || [];
+      const rawItems = order.items && order.items.length > 0 ? order.items : [{ name: 'Fashion Apparel Item', quantity: 1, price: order.total || 0 }];
+      const items = rawItems.map(enrichOrderItem);
       document.getElementById('modal-items').innerHTML = `
         <h3 style="font-size:var(--text-sm); font-weight:600; margin-bottom:12px;">Items Ordered</h3>
-        ${items.map(item => `
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:var(--text-sm);">
-            <div style="width:36px;height:36px;background:var(--color-surface-2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              <i data-lucide="shirt" width="16" height="16" style="color:var(--color-text-faint);"></i>
+        ${items.map(item => {
+          const imgHtml = item.image 
+            ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.parentElement.innerHTML='<i data-lucide=\\'shirt\\' width=\\'16\\' height=\\'16\\'></i>'">`
+            : `<i data-lucide="shirt" width="16" height="16" style="color:var(--color-text-faint);"></i>`;
+          return `
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:var(--text-sm);">
+              <div style="width:44px;height:44px;background:var(--color-surface-2);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--color-border);">
+                ${imgHtml}
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
+                <div style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:2px;">
+                  ${item.size ? `<span class="badge" style="padding:1px 6px;font-size:10px;margin-right:4px;">${item.size}</span>` : ''}
+                  Qty: ${item.quantity || 1} &bull; Unit: ${window.formatCurrency(item.price || 0)}
+                </div>
+              </div>
+              <div style="color:var(--color-gold);font-weight:700;font-size:var(--text-sm);white-space:nowrap;">
+                ${window.formatCurrency((item.price || 0) * (item.quantity || 1))}
+              </div>
             </div>
-            <div style="flex:1;">${item.name || 'Product'} <span style="color:var(--color-text-muted);">× ${item.quantity || 1}</span></div>
-            <div style="color:var(--color-gold);font-weight:600;">${window.formatCurrency((item.price || 0) * (item.quantity || 1))}</div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       `;
 
       document.getElementById('modal-totals').innerHTML = `
