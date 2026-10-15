@@ -206,18 +206,45 @@
       const productMap = {};
       products.forEach(p => { productMap[p.id] = p; });
 
-      // Reliable fashion fallback so Unknown Product NEVER appears
-      const defaultFashionItem = {
-        id: 'men-1',
-        name: 'Slim-Fit Oxford Tailored Shirt',
-        price: 4200,
-        images: ['../images/products/men_1.jpg'],
-        category: 'Men',
-        stock: 22
-      };
+      function resolveCartItemImage(p) {
+        if (!p) return '../images/products/dress_1.jpg';
+        let img = '';
+        if (Array.isArray(p.images) && p.images.length > 0 && p.images[0]) {
+          img = p.images[0];
+        } else if (p.image) {
+          img = p.image;
+        } else if (p.img) {
+          img = p.img;
+        } else if (p.thumbnail) {
+          img = p.thumbnail;
+        }
+        if (!img) {
+          const cat = (p.category || '').toLowerCase();
+          if (cat.includes('dress')) return '../images/products/dress_1.jpg';
+          if (cat.includes('men')) return '../images/products/men_1.jpg';
+          if (cat.includes('shoe')) return '../images/products/shoes_1.jpg';
+          if (cat.includes('bag')) return '../images/products/bag_1.jpg';
+          if (cat.includes('access')) return '../images/products/access_1.jpg';
+          return '../images/products/women_1.jpg';
+        }
+        if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
+          return img;
+        }
+        img = img.replace(/^\/+/, '');
+        if (img.startsWith('../')) {
+          return img;
+        }
+        return '../' + img;
+      }
 
       cartProducts = cart.map(item => {
-        const prod = productMap[item.productId] || defaultFashionItem;
+        const prod = productMap[item.productId] || {
+          id: item.productId,
+          name: item.name || 'Fashion Apparel',
+          price: item.price || 4200,
+          category: item.category || 'Dresses',
+          images: [item.image || 'images/products/dress_1.jpg']
+        };
         return {
           ...item,
           product: prod
@@ -228,10 +255,11 @@
         const p = item.product;
         const price = p.salePrice || p.price || 0;
         const subtotal = price * (item.quantity || 1);
+        const itemImg = resolveCartItemImage(p);
         return `
           <div class="cart-item" data-product-id="${item.productId}">
             <div style="width:100px;height:130px;border-radius:var(--radius-lg);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--color-border);overflow:hidden;">
-              <img src="${(p.images && p.images[0]) ? p.images[0] : (p.img || '../images/products/men_1.jpg')}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);" onerror="this.onerror=null; this.src='../images/products/men_1.jpg';" />
+              <img src="${itemImg}" alt="${p.name || 'Fashion Apparel'}" style="width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:var(--radius-lg);" onerror="this.onerror=null; this.src='../images/products/dress_1.jpg';" />
             </div>
             <div class="cart-item-body">
               <div class="cart-item-name">${p.name}</div>
