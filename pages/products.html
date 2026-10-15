@@ -153,7 +153,7 @@
         <aside class="filters-sidebar" id="filters-sidebar">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-5);">
             <h2 style="font-family:var(--font-heading); font-size:var(--text-base); font-weight:var(--weight-bold);">Filters</h2>
-            <button class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear All</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn" onclick="clearAllFilters()" style="cursor:pointer; color:var(--color-gold);">Clear All</button>
           </div>
 
           <!-- Category -->
@@ -422,24 +422,60 @@
       applyFilters();
     };
 
-    // Clear filters
+    // Clear all filters & return completely to default state
     window.clearAllFilters = () => {
+      // 1. Reset category radio to 'All Categories'
       const allRadio = document.querySelector('input[name="category"][value=""]');
       if (allRadio) allRadio.checked = true;
-      document.getElementById('min-price').value = '';
-      document.getElementById('max-price').value = '';
-      document.getElementById('filter-new').checked = false;
-      document.getElementById('filter-sale').checked = false;
-      document.getElementById('product-search').value = '';
-      
+
+      // 2. Reset rating radio
+      const anyRating = document.querySelector('input[name="rating"][value=""]');
+      if (anyRating) anyRating.checked = true;
+
+      // 3. Reset price inputs
+      const minP = document.getElementById('min-price');
+      if (minP) minP.value = '';
+      const maxP = document.getElementById('max-price');
+      if (maxP) maxP.value = '';
+
+      // 4. Reset checkboxes
+      const chkNew = document.getElementById('filter-new');
+      if (chkNew) chkNew.checked = false;
+      const chkSale = document.getElementById('filter-sale');
+      if (chkSale) chkSale.checked = false;
+
+      // 5. Reset search box
+      const searchBox = document.getElementById('product-search');
+      if (searchBox) searchBox.value = '';
+
+      // 6. Reset sort select to default
+      const sortSel = document.getElementById('sort-select');
+      if (sortSel) sortSel.value = 'createdAt-desc';
+      currentSort = 'createdAt-desc';
+
+      // 7. Reset sizes and color badges
       selectedSizes = [];
       selectedColors = [];
       document.querySelectorAll('.size-btn.active').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.color-dot.active').forEach(d => d.classList.remove('active'));
 
+      // 8. Reset filters state
       currentFilters = { category: '', search: '', minPrice: null, maxPrice: null, isNew: false, onSale: false };
+
+      // 9. Remove URL search parameters (?cat=shoes, etc.) so URL returns to default
+      if (window.history && window.history.pushState) {
+        window.history.pushState({}, '', window.location.pathname);
+      }
+
+      // 10. Re-render all default 150 products
       loadProducts(false);
     };
+
+    // Attach direct event listener to Clear All button
+    document.getElementById('clear-filters-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.clearAllFilters();
+    });
 
     // Load More
     document.getElementById('load-more-btn')?.addEventListener('click', () => loadProducts(true));
