@@ -4112,6 +4112,78 @@
     return null;
   }
 
+  // Helper to dynamically calculate live order counts across all statuses
+  function getLiveOrderStats() {
+    let deletedOrders = [];
+    try {
+      deletedOrders = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
+    } catch(e) {}
+
+    let overrides = {};
+    try {
+      overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+    } catch(e) {}
+
+    const getStatus = (id, defStatus) => {
+      const cleanId = (id || '').replace(/[#\s-]/g, '').toUpperCase();
+      for (const k in overrides) {
+        const cleanK = k.replace(/[#\s-]/g, '').toUpperCase();
+        if (cleanK === cleanId || cleanK.includes(cleanId) || cleanId.includes(cleanK)) {
+          return overrides[k].toLowerCase();
+        }
+      }
+      return (defStatus || 'pending').toLowerCase();
+    };
+
+    const isDeleted = (id) => {
+      const clean = (id || '').replace(/[#\s-]/g, '').toUpperCase();
+      return deletedOrders.some(d => {
+        const cleanD = (d || '').replace(/[#\s-]/g, '').toUpperCase();
+        return clean === cleanD || clean.includes(cleanD) || cleanD.includes(clean);
+      });
+    };
+
+    let all = [];
+
+    // Local placed orders
+    try {
+      const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+      placed.forEach(o => {
+        const oid = o.orderId || o.id;
+        if (oid && !isDeleted(oid)) {
+          all.push({
+            id: oid,
+            status: getStatus(oid, o.status || 'pending'),
+            total: o.total || 0
+          });
+        }
+      });
+    } catch(e) {}
+
+    // Demo orders (deduplicated)
+    for (const key in DEMO_ORDERS) {
+      if (!isDeleted(key) && !all.some(a => (a.id || '').replace(/[#\s-]/g, '').toUpperCase() === key.replace(/[#\s-]/g, '').toUpperCase())) {
+        all.push({
+          id: key,
+          status: getStatus(key, DEMO_ORDERS[key].status),
+          total: parseFloat(String(DEMO_ORDERS[key].total || '0').replace(/[^0-9.]/g, '')) || 0
+        });
+      }
+    }
+
+    const counts = {
+      all: all.length,
+      pending: all.filter(o => o.status === 'pending').length,
+      processing: all.filter(o => o.status === 'processing').length,
+      shipped: all.filter(o => o.status === 'shipped').length,
+      delivered: all.filter(o => o.status === 'delivered').length,
+      cancelled: all.filter(o => o.status === 'cancelled').length,
+      totalRevenue: all.reduce((sum, o) => sum + (o.total || 0), 0)
+    };
+
+    return { counts, orders: all };
+  }
+
   // Super-User Order Resolver (Handles exact, partial, or synthesized)
   function lookupOrder(query) {
     if (!query) return null;
@@ -4805,6 +4877,91 @@
           <p style="font-size:12px; margin-top:4px;"><a href="${trackOrderPath}?orderId=${currentContextOrder.id}" style="color:var(--color-gold);">View Full Real-Time Courier Map & Invoice ↗</a></p>
         `;
       }
+    }
+
+    // ------------------------------------------------------------
+    // INTENT: LIVE ORDER STATS & STATUS BREAKDOWNS
+    // ("how many orders in pending", "how many pending orders", "total orders", "orders count")
+    // Tested BEFORE single-order tracking so queries asking about orders count are answered accurately!
+    // ------------------------------------------------------------
+    const isOrderStatsQuery = /how many (orders|order)|total orders?|orders? (count|stats|statistics|summary|breakdown|ganana|keeyak)|(pending|processing|shipped|delivered|cancelled) orders?|orders? in (pending|processing|shipped|delivered|cancelled)|order status summary/i.test(q);
+
+    if (isOrderStatsQuery) {
+      const statsData = getLiveOrderStats();
+      const counts = statsData.counts;
+      const allOrdersList = statsData.orders;
+
+      // Check if user asked about a specific status
+      const statusMatch = q.match(/\b(pending|processing|shipped|delivered|cancelled)\b/i);
+
+      if (statusMatch) {
+        const targetStatus = statusMatch[1].toLowerCase();
+        const count = counts[targetStatus] || 0;
+        const matchingOrders = allOrdersList.filter(o => o.status === targetStatus);
+        const orderIds = matchingOrders.map(o => `#${o.id}`).join(', ');
+
+        const statusIcons = {
+          pending: '⏳',
+          processing: '⚙️',
+          shipped: '🚚',
+          delivered: '✅',
+          cancelled: '❌'
+        };
+        const statusColors = {
+          pending: '#C9A96E',
+          processing: '#F59E0B',
+          shipped: '#60A5FA',
+          delivered: '#4CAF6E',
+          cancelled: '#EF4444'
+        };
+
+        const icon = statusIcons[targetStatus] || '📦';
+        const color = statusColors[targetStatus] || 'var(--color-gold)';
+        const statusTitle = targetStatus.charAt(0).toUpperCase() + targetStatus.slice(1);
+
+        let ordersDetail = '';
+        if (matchingOrders.length > 0) {
+          ordersDetail = `
+            <div style="margin-top:8px; font-size:12.5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
+              <div><strong>Matching Order IDs:</strong> <span style="color:${color}; font-weight:600;">${orderIds}</span></div>
+              <div style="font-size:11.5px; color:var(--color-text-muted); margin-top:4px;">Type <em>"status &lt;Order-ID&gt;"</em> to view full tracking and invoice details.</div>
+            </div>
+          `;
+        }
+
+        return `
+          <p>${icon} <strong>Live ${statusTitle} Orders Intelligence:</strong></p>
+          <p style="font-size:13.5px; line-height:1.6; margin:6px 0;">
+            There are currently <strong style="color:${color}; font-size:16px;">${count} order(s)</strong> in <strong>${statusTitle}</strong> status in our live system.
+          </p>
+          ${ordersDetail}
+          <div style="margin-top:10px;">
+            <a href="${isAdminPage ? 'orders.html' : 'pages/admin/orders.html'}" class="chat-order-track-btn" style="text-decoration:none;">
+              <span>Open Manage Orders Dashboard &rarr;</span>
+            </a>
+          </div>
+        `;
+      }
+
+      // If asked generally about all orders / order statistics
+      return `
+        <p>📊 <strong>Live Store Orders Intelligence:</strong></p>
+        <p style="font-size:13px; line-height:1.6; margin:6px 0 10px 0;">
+          Our system is currently tracking <strong style="color:var(--color-gold); font-size:15px;">${counts.all} total orders</strong>:
+        </p>
+        <ul style="margin:0 0 12px 18px; padding:0; font-size:12.5px; line-height:1.8;">
+          <li>⏳ <strong>Pending Orders:</strong> <strong style="color:#C9A96E;">${counts.pending}</strong> (Awaiting warehouse dispatch)</li>
+          <li>⚙️ <strong>Processing Orders:</strong> <strong style="color:#F59E0B;">${counts.processing}</strong> (Fulfillment quality check)</li>
+          <li>🚚 <strong>Shipped Orders:</strong> <strong style="color:#60A5FA;">${counts.shipped}</strong> (In courier transit)</li>
+          <li>✅ <strong>Delivered Orders:</strong> <strong style="color:#4CAF6E;">${counts.delivered}</strong> (Completed)</li>
+          <li>❌ <strong>Cancelled Orders:</strong> <strong style="color:#EF4444;">${counts.cancelled}</strong></li>
+        </ul>
+        <div style="margin-top:10px;">
+          <a href="${isAdminPage ? 'orders.html' : 'pages/admin/orders.html'}" class="chat-order-track-btn" style="text-decoration:none;">
+            <span>Manage All Orders in Admin &rarr;</span>
+          </a>
+        </div>
+      `;
     }
 
     // ------------------------------------------------------------
