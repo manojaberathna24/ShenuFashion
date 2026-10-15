@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Reviews & Ratings — Shenu Admin</title>
+  <meta name="description" content="Manage verified customer ratings and reviews in Shenu Fashion Store admin panel." />
+
+  <link rel="stylesheet" href="../../css/main.css?v=26" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/pages.css?v=4" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C9A96E'/><text y='22' x='6' font-size='20' font-family='serif' font-weight='bold' fill='%230F0F1A'>S</text></svg>" />
+  <!-- Immediate Theme Pre-loader -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('shenu_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch(e) {}
+    })();
+    window.toggleTheme = function() {
+      try {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        var nxt = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nxt);
+        if (document.body) document.body.setAttribute('data-theme', nxt);
+        try { localStorage.setItem('shenu_theme', nxt); } catch(e) {}
+        if (typeof window.updateThemeIcons === 'function') {
+          window.updateThemeIcons(nxt);
+        } else {
+          document.querySelectorAll('.theme-icon-sun').forEach(function(i) { i.style.display = nxt === 'light' ? 'none' : 'inline-block'; });
+          document.querySelectorAll('.theme-icon-moon').forEach(function(i) { i.style.display = nxt === 'light' ? 'inline-block' : 'none'; });
+        }
+        if (typeof window.showToast === 'function') {
+          showToast((nxt === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode') + ' Activated', 'info');
+        }
+      } catch(e) { console.error('Theme toggle error:', e); }
+    };
+  </script>
+  <link rel="stylesheet" href="../../css/chatbot.css?v=125" />
+</head>
+<body>
+  <div id="toast-container"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-logo">
+        <a href="../../index.html" class="navbar-logo">
+          <div class="navbar-logo-icon">S</div>
+          <div class="navbar-logo-text">SHENU <span>ADMIN</span></div>
+        </a>
+      </div>
+
+      <nav class="admin-nav">
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Overview</div>
+          <a href="dashboard.html" class="admin-nav-item">
+            <i data-lucide="layout-dashboard" width="18" height="18"></i>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Store</div>
+          <a href="products.html" class="admin-nav-item">
+            <i data-lucide="shirt" width="18" height="18"></i>
+            Products
+          </a>
+          <a href="products.html" class="admin-nav-item">
+            <i data-lucide="tag" width="18" height="18"></i>
+            Categories
+          </a>
+          <a href="orders.html" class="admin-nav-item">
+            <i data-lucide="package" width="18" height="18"></i>
+            Orders
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Users & Community</div>
+          <a href="users.html" class="admin-nav-item">
+            <i data-lucide="users" width="18" height="18"></i>
+            Customers
+          </a>
+          <a href="reviews.html" class="admin-nav-item active">
+            <i data-lucide="star" width="18" height="18"></i>
+            Reviews
+          </a>
+        </div>
+
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-label">Storefront</div>
+          <a href="../../index.html" class="admin-nav-item">
+            <i data-lucide="store" width="18" height="18"></i>
+            View Store
+          </a>
+          <button class="admin-nav-item danger" id="admin-logout" style="border:none;width:100%;text-align:left;cursor:pointer;background:none;color:var(--color-error);">
+            <i data-lucide="log-out" width="18" height="18"></i>
+            Logout
+          </button>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <h1 class="admin-page-title">Customer Reviews & Ratings</h1>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <!-- Light / Dark Mode Toggle -->
+          <button type="button" class="navbar-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="cursor:pointer; background:var(--color-surface); border:1px solid var(--color-border); width:40px; height:40px; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="sun" class="theme-icon-sun" width="18" height="18" style="color:var(--color-gold);"></i>
+            <i data-lucide="moon" class="theme-icon-moon" width="18" height="18" style="display:none; color:var(--color-text-muted);"></i>
+          </button>
+          <div style="position:relative; width:240px;">
+            <input type="text" id="review-search" class="form-control" placeholder="Search reviews..." oninput="handleSearch(this.value)" style="padding-left:36px;" />
+            <i data-lucide="search" width="16" height="16" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-text-muted);"></i>
+          </div>
+          <button class="btn btn-primary" onclick="openAddReviewModal()" style="display:inline-flex; align-items:center; gap:6px;">
+            <i data-lucide="plus" width="16" height="16"></i> Add Review
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-4" style="gap:var(--space-4); margin-bottom:var(--space-6);">
+        <div class="card" style="padding:var(--space-5);">
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Average Score</div>
+          <div style="display:flex; align-items:baseline; gap:6px;">
+            <span id="metric-avg-rating" style="font-family:var(--font-heading); font-size:var(--text-3xl); font-weight:700; color:var(--color-gold);">4.8</span>
+            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">/ 5.0</span>
+          </div>
+          <div style="font-size:var(--text-xs); color:#10B981; margin-top:4px;">★★★★★ Based on verified purchases</div>
+        </div>
+
+        <div class="card" style="padding:var(--space-5);">
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total Reviews</div>
+          <div id="metric-total-reviews" style="font-family:var(--font-heading); font-size:var(--text-3xl); font-weight:700; color:var(--color-text);">18</div>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:4px;">Across all store items</div>
+        </div>
+
+        <div class="card" style="padding:var(--space-5);">
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">5-Star Satisfaction</div>
+          <div id="metric-5star-rate" style="font-family:var(--font-heading); font-size:var(--text-3xl); font-weight:700; color:var(--color-accent);">88.9%</div>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:4px;">Top positive feedback</div>
+        </div>
+
+        <div class="card" style="padding:var(--space-5);">
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Verified Buyers</div>
+          <div style="font-family:var(--font-heading); font-size:var(--text-3xl); font-weight:700; color:#10B981;">100%</div>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:4px;">Fraud-free authenticity</div>
+        </div>
+      </div>
+
+      <!-- Star Filter Chips -->
+      <div class="filter-chips" style="margin-bottom:var(--space-6);">
+        <button class="chip active" onclick="setFilterRating(0, this)">All (<span id="chip-count-all">18</span>)</button>
+        <button class="chip" onclick="setFilterRating(5, this)">★ 5 Stars (<span id="chip-count-5">16</span>)</button>
+        <button class="chip" onclick="setFilterRating(4, this)">★ 4 Stars (<span id="chip-count-4">2</span>)</button>
+        <button class="chip" onclick="setFilterRating(3, this)">★ 3 Stars (<span id="chip-count-3">0</span>)</button>
+        <button class="chip" onclick="setFilterRating(2, this)">★ 2 Stars (<span id="chip-count-2">0</span>)</button>
+        <button class="chip" onclick="setFilterRating(1, this)">★ 1 Star (<span id="chip-count-1">0</span>)</button>
+      </div>
+
+      <!-- Data Table -->
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Customer</th>
+              <th>Rating</th>
+              <th>Review Details</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th style="text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reviews-tbody">
+            <tr><td colspan="7" style="padding:40px; text-align:center;"><div class="skeleton skeleton-text" style="width:50%;margin:0 auto;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Review Modal -->
+  <div id="add-review-modal" class="modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div class="card" style="width:100%; max-width:520px; max-height:90vh; overflow-y:auto; padding:var(--space-6); background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-xl);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4);">
+        <h3 style="font-family:var(--font-heading); font-size:var(--text-lg); font-weight:700;">Add Verified Customer Review</h3>
+        <button type="button" onclick="closeAddReviewModal()" style="background:none; border:none; color:var(--color-text-muted); cursor:pointer; font-size:20px;">✕</button>
+      </div>
+
+      <form id="add-review-form" onsubmit="submitNewReview(event)">
+        <div style="margin-bottom:var(--space-4);">
+          <label style="display:block; font-size:var(--text-xs); font-weight:600; margin-bottom:6px;">Select Product</label>
+          <select id="new-rev-product" class="form-control" required>
+            <option value="Classic Oxford Cotton Shirt|Men|https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400">Classic Oxford Cotton Shirt (Men)</option>
+            <option value="Floral Silk Chiffon Midi Dress|Dresses|https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400">Floral Silk Chiffon Midi Dress (Dresses)</option>
+            <option value="Silk Evening Blouse|Women|https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=400">Silk Evening Blouse (Women)</option>
+            <option value="18K Gold Plated Chain Necklace|Accessories|https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400">18K Gold Plated Chain Necklace (Accessories)</option>
+            <option value="Quilted Chain Leather Bag|Bags|https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400">Quilted Chain Leather Bag (Bags)</option>
+            <option value="Stiletto Evening Heels|Shoes|https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400">Stiletto Evening Heels (Shoes)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap:var(--space-3); margin-bottom:var(--space-4);">
+          <div>
+            <label style="display:block; font-size:var(--text-xs); font-weight:600; margin-bottom:6px;">Customer Name</label>
+            <input type="text" id="new-rev-author" class="form-control" placeholder="e.g. Kasun Perera" required />
+          </div>
+          <div>
+            <label style="display:block; font-size:var(--text-xs); font-weight:600; margin-bottom:6px;">Star Rating (1 - 5)</label>
+            <select id="new-rev-rating" class="form-control" required>
+              <option value="5" selected>★★★★★ 5 Stars</option>
+              <option value="4">★★★★☆ 4 Stars</option>
+              <option value="3">★★★☆☆ 3 Stars</option>
+              <option value="2">★★☆☆☆ 2 Stars</option>
+              <option value="1">★☆☆☆☆ 1 Star</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <label style="display:block; font-size:var(--text-xs); font-weight:600; margin-bottom:6px;">Review Headline / Title</label>
+          <input type="text" id="new-rev-title" class="form-control" placeholder="e.g. Perfect fit and luxury material!" required />
+        </div>
+
+        <div style="margin-bottom:var(--space-5);">
+          <label style="display:block; font-size:var(--text-xs); font-weight:600; margin-bottom:6px;">Detailed Feedback</label>
+          <textarea id="new-rev-comment" class="form-control" rows="3" placeholder="Write the customer's comments..." required></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-ghost" onclick="closeAddReviewModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { logoutUser } from '../../js/auth.js';
+
+    lucide.createIcons();
+
+    const DEFAULT_REVIEWS = [
+      {
+        id: 'rev-101',
+        productName: 'Floral Silk Chiffon Midi Dress',
+        category: 'Dresses',
+        image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400',
+        author: 'Ayesha Fernando',
+        rating: 5,
+        title: 'Exceptional Quality & Super Fast Delivery!',
+        comment: 'The stitching and fabric quality exceeded my expectations. Sizing is 100% accurate and the delivery arrived safely within 48 hours.',
+        date: 'Oct 12, 2026',
+        verified: true
+      },
+      {
+        id: 'rev-102',
+        productName: 'Classic Oxford Cotton Shirt',
+        category: 'Men',
+        image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400',
+        author: 'Kasun Perera',
+        rating: 5,
+        title: 'Premium cotton and very comfortable for office wear',
+        comment: 'Very breathable pure cotton fabric. Color did not fade after first wash. Great tailored silhouette.',
+        date: 'Oct 10, 2026',
+        verified: true
+      },
+      {
+        id: 'rev-103',
+        productName: 'Silk Evening Blouse',
+        category: 'Women',
+        image: 'https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?w=400',
+        author: 'Sanduni Silva',
+        rating: 5,
+        title: 'Looks even better than the pictures!',
+        comment: 'Very elegant apparel. Color match is perfect and very comfortable to wear for evening events.',
+        date: 'Oct 08, 2026',
+        verified: true
+      },
+      {
+        id: 'rev-104',
+        productName: '18K Gold Plated Chain Necklace',
+        category: 'Accessories',
+        image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400',
+        author: 'Nimali Dias',
+        rating: 4,
+        title: 'Gorgeous shine, nice luxury packaging',
+        comment: 'Good modern design. Premium feel and packaging was neat. Will definitely purchase again.',
+        date: 'Sep 28, 2026',
+        verified: true
+      },
+      {
+        id: 'rev-105',
+        productName: 'Quilted Chain Leather Bag',
+        category: 'Bags',
+        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400',
+        author: 'Dilini Senanayake',
+        rating: 5,
+        title: 'High end finish for a very fair price',
+        comment: 'The metal hardware and chain feel heavy and luxurious. Plenty of compartments inside.',
+        date: 'Sep 24, 2026',
+        verified: true
+      },
+      {
+        id: 'rev-106',
+        productName: 'Stiletto Evening Heels',
+        category: 'Shoes',
+        image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400',
+        author: 'Ruwanthi Wijesinghe',
+        rating: 5,
+        title: 'Surprisingly cushioned and easy to walk in',
+        comment: 'Wore them for a 4 hour wedding reception and had zero blisters. Highly recommended!',
+        date: 'Sep 18, 2026',
+        verified: true
+      }
+    ];
+
+    let allReviews = [];
+    let currentRatingFilter = 0;
+    let searchQuery = '';
+
+    function loadReviews() {
+      try {
+        const stored = localStorage.getItem('shenu_store_reviews');
+        if (stored) {
+          allReviews = JSON.parse(stored);
+        } else {
+          allReviews = [...DEFAULT_REVIEWS];
+          localStorage.setItem('shenu_store_reviews', JSON.stringify(allReviews));
+        }
+      } catch(e) {
+        allReviews = [...DEFAULT_REVIEWS];
+      }
+      renderFiltered();
+    }
+
+    function saveReviews() {
+      try {
+        localStorage.setItem('shenu_store_reviews', JSON.stringify(allReviews));
+      } catch(e) {}
+    }
+
+    function updateKPIs() {
+      const total = allReviews.length;
+      document.getElementById('metric-total-reviews').textContent = total;
+
+      if (total === 0) {
+        document.getElementById('metric-avg-rating').textContent = '0.0';
+        document.getElementById('metric-5star-rate').textContent = '0%';
+        return;
+      }
+
+      const sum = allReviews.reduce((acc, r) => acc + (r.rating || 5), 0);
+      const avg = (sum / total).toFixed(1);
+      document.getElementById('metric-avg-rating').textContent = avg;
+
+      const fiveStars = allReviews.filter(r => r.rating === 5).length;
+      const rate = ((fiveStars / total) * 100).toFixed(1);
+      document.getElementById('metric-5star-rate').textContent = `${rate}%`;
+
+      document.getElementById('chip-count-all').textContent = total;
+      for (let s = 1; s <= 5; s++) {
+        const count = allReviews.filter(r => r.rating === s).length;
+        const el = document.getElementById(`chip-count-${s}`);
+        if (el) el.textContent = count;
+      }
+    }
+
+    function renderFiltered() {
+      updateKPIs();
+
+      let filtered = [...allReviews];
+
+      if (currentRatingFilter > 0) {
+        filtered = filtered.filter(r => r.rating === currentRatingFilter);
+      }
+
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(r =>
+          (r.author || '').toLowerCase().includes(q) ||
+          (r.productName || '').toLowerCase().includes(q) ||
+          (r.title || '').toLowerCase().includes(q) ||
+          (r.comment || '').toLowerCase().includes(q)
+        );
+      }
+
+      const tbody = document.getElementById('reviews-tbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:40px; text-align:center; color:var(--color-text-faint);">No customer reviews found matching criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => {
+        const stars = '★'.repeat(r.rating || 5) + '☆'.repeat(5 - (r.rating || 5));
+        return `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${r.image || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100'}" alt="${r.productName}" style="width:40px; height:40px; border-radius:var(--radius-md); object-fit:cover; border:1px solid var(--color-border);" />
+                <div>
+                  <div style="font-weight:600; font-size:var(--text-sm);">${r.productName || 'Fashion Apparel'}</div>
+                  <span class="badge" style="font-size:10px; padding:1px 6px;">${r.category || 'Apparel'}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600; font-size:var(--text-sm);">${r.author || 'Customer'}</div>
+              <div style="font-size:11px; color:#10B981; display:inline-flex; align-items:center; gap:3px;">
+                <i data-lucide="check-circle" width="12" height="12"></i> Verified Buyer
+              </div>
+            </td>
+            <td>
+              <div style="color:var(--color-gold); letter-spacing:2px; font-size:14px;">${stars}</div>
+              <div style="font-size:11px; color:var(--color-text-muted);">${r.rating}.0 / 5.0</div>
+            </td>
+            <td style="max-width:280px;">
+              <div style="font-weight:600; font-size:var(--text-xs); color:var(--color-text); margin-bottom:2px;">${r.title || 'Review'}</div>
+              <div style="font-size:12px; color:var(--color-text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${r.comment || ''}</div>
+            </td>
+            <td style="font-size:var(--text-xs); color:var(--color-text-muted); white-space:nowrap;">${r.date || 'Recent'}</td>
+            <td>
+              <span class="badge badge-accent" style="font-size:11px;">Published</span>
+            </td>
+            <td style="text-align:center;">
+              <button class="btn btn-sm" onclick="confirmDeleteReview('${r.id}')" title="Delete Review" style="padding:6px 12px; border-radius:var(--radius-md); border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#ef4444; font-size:var(--text-xs); font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
+                <i data-lucide="trash-2" width="14" height="14"></i> Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    window.setFilterRating = (stars, btn) => {
+      document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      currentRatingFilter = stars;
+      renderFiltered();
+    };
+
+    window.handleSearch = (val) => {
+      searchQuery = (val || '').trim();
+      renderFiltered();
+    };
+
+    window.confirmDeleteReview = (id) => {
+      if (!id) return;
+      if (confirm('Are you sure you want to permanently delete this customer review? This cannot be undone.')) {
+        allReviews = allReviews.filter(r => r.id !== id);
+        saveReviews();
+        renderFiltered();
+        if (typeof window.showToast === 'function') {
+          showToast('Customer review deleted successfully', 'success');
+        }
+      }
+    };
+
+    window.openAddReviewModal = () => {
+      document.getElementById('add-review-modal').style.display = 'flex';
+    };
+
+    window.closeAddReviewModal = () => {
+      document.getElementById('add-review-modal').style.display = 'none';
+      document.getElementById('add-review-form').reset();
+    };
+
+    window.submitNewReview = (e) => {
+      e.preventDefault();
+      const productParts = document.getElementById('new-rev-product').value.split('|');
+      const productName = productParts[0];
+      const category = productParts[1];
+      const image = productParts[2];
+      const author = document.getElementById('new-rev-author').value.trim();
+      const rating = parseInt(document.getElementById('new-rev-rating').value, 10) || 5;
+      const title = document.getElementById('new-rev-title').value.trim();
+      const comment = document.getElementById('new-rev-comment').value.trim();
+
+      const newRev = {
+        id: 'rev-' + Date.now(),
+        productName,
+        category,
+        image,
+        author,
+        rating,
+        title,
+        comment,
+        date: 'Today',
+        verified: true
+      };
+
+      allReviews.unshift(newRev);
+      saveReviews();
+      closeAddReviewModal();
+      renderFiltered();
+
+      if (typeof window.showToast === 'function') {
+        showToast('New review added successfully', 'success');
+      }
+    };
+
+    document.getElementById('admin-logout')?.addEventListener('click', () => logoutUser());
+
+    loadReviews();
+  </script>
+
+  <script src="../../js/app.js?v=25" type="module"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
+  <!-- Shenu AI Chatbot Assistant -->
+  <script src="../../js/chatbot.js?v=125" type="module"></script>
+  <!-- Floating AI Chatbot Button -->
+  <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
+    <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />
+    <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+    <span class="trigger-online-dot"></span>
+  </button>
+</body>
+</html>
