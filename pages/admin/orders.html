@@ -177,6 +177,11 @@
         else if (overrides[o.id]) o.status = overrides[o.id];
       });
 
+      window.allOrders = allOrders;
+      try {
+        localStorage.setItem('shenu_all_orders', JSON.stringify(allOrders));
+      } catch(e) {}
+
       renderOrders(allOrders);
     }
 
@@ -292,6 +297,11 @@
       } catch (e) {}
 
       // 4. Re-render order row immediately with the updated badge color
+      window.allOrders = allOrders;
+      try {
+        localStorage.setItem('shenu_all_orders', JSON.stringify(allOrders));
+      } catch(e) {}
+
       const currentFiltered = currentFilter ? allOrders.filter(o => o.status === currentFilter) : allOrders;
       renderOrders(currentFiltered);
 
@@ -317,6 +327,11 @@
         return oid !== clean && oid !== orderId.toUpperCase();
       });
 
+      window.allOrders = allOrders;
+      try {
+        localStorage.setItem('shenu_all_orders', JSON.stringify(allOrders));
+      } catch(e) {}
+
       // 3. Re-render table
       const filtered = currentFilter ? allOrders.filter(o => o.status === currentFilter) : allOrders;
       renderOrders(filtered);
@@ -333,7 +348,7 @@
   <script src="../../js/app.js?v=25" type="module"></script>
   <script>document.addEventListener('DOMContentLoaded', () => lucide.createIcons());</script>
   <!-- Shenu AI Chatbot Assistant -->
-  <script src="../../js/chatbot.js?v=120" type="module"></script>
+  <script src="../../js/chatbot.js?v=125" type="module"></script>
       <!-- Floating AI Chatbot Button with Character Avatar -->
   <button id="shenu-chat-trigger" title="Chat with Shenu AI Stylist & Track Orders" onclick="window.toggleShenuChat && window.toggleShenuChat()" aria-label="Open Shenu AI Chatbot">
     <img src="../../images/shenu_ai_avatar.png" alt="Shenu AI Stylist" class="trigger-avatar-img" />

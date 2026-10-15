@@ -4112,73 +4112,102 @@
     return null;
   }
 
-  // Helper to dynamically calculate live order counts across all statuses
-  function getLiveOrderStats() {
-    let deletedOrders = [];
-    try {
-      deletedOrders = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
-    } catch(e) {}
+  // Unified Live Store Orders Provider
+  // Reads authoritative orders from active page memory, localStorage, and Firestore overrides
+  function getLiveStoreOrders() {
+    let combined = [];
 
-    let overrides = {};
-    try {
-      overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
-    } catch(e) {}
-
-    const getStatus = (id, defStatus) => {
-      const cleanId = (id || '').replace(/[#\s-]/g, '').toUpperCase();
-      for (const k in overrides) {
-        const cleanK = k.replace(/[#\s-]/g, '').toUpperCase();
-        if (cleanK === cleanId || cleanK.includes(cleanId) || cleanId.includes(cleanK)) {
-          return overrides[k].toLowerCase();
+    // 1. Direct memory if on admin page
+    if (window.allOrders && Array.isArray(window.allOrders) && window.allOrders.length > 0) {
+      combined = [...window.allOrders];
+    } else {
+      // 2. Check unified synced cache from Admin/Firestore
+      try {
+        const cached = JSON.parse(localStorage.getItem('shenu_all_orders') || '[]');
+        if (Array.isArray(cached) && cached.length > 0) {
+          combined = [...cached];
         }
-      }
-      return (defStatus || 'pending').toLowerCase();
-    };
+      } catch(e) {}
+    }
 
-    const isDeleted = (id) => {
-      const clean = (id || '').replace(/[#\s-]/g, '').toUpperCase();
-      return deletedOrders.some(d => {
-        const cleanD = (d || '').replace(/[#\s-]/g, '').toUpperCase();
-        return clean === cleanD || clean.includes(cleanD) || cleanD.includes(clean);
-      });
-    };
+    // 3. Fallback: If not in memory or cache, load from placed orders + demo orders
+    if (combined.length === 0) {
+      try {
+        const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
+        combined.push(...placed);
+      } catch(e) {}
 
-    let all = [];
+      const baseDemo = [
+        { id:'ORD-001234', userName:'Ayesha Fernando', userEmail:'ayesha@email.com', items:[{name:'Floral Silk Dress'},{name:'Leather Bag'}], total:11700, status:'delivered', courier:'PromptX Courier (Delivered to Recipient)', date:'Aug 1, 2026', city:'Colombo 03', address:'123 Galle Road, Colombo 03', paymentMethod:'Credit Card (Visa)' },
+        { id:'ORD-001187', userName:'Kasun Perera',    userEmail:'kasun@email.com',  items:[{name:'Classic Oxford Cotton Shirt'}], total:3800, status:'processing', courier:'Fulfillment Center (Quality Check)', date:'Aug 15, 2026', city:'Kandy', address:'78 Peradeniya Road, Kandy', paymentMethod:'Koko Pay (Installments)' },
+        { id:'ORD-001056', userName:'Sanduni Silva',   userEmail:'sanduni@email.com', items:[{name:'Silk Evening Blouse'}], total:5200, status:'processing', courier:'Fulfillment Center (Processing)', date:'Aug 25, 2026', city:'Galle', address:'12 Fort Street, Galle', paymentMethod:'Cash on Delivery (COD)' },
+        { id:'ORD-000998', userName:'Nimali Dias',     userEmail:'nimali@email.com',  items:[{name:'Gold Plated Chain Necklace'}], total:7300, status:'processing', courier:'Fulfillment Center (Quality Check)', date:'Aug 20, 2026', city:'Negombo', address:'89 Beach Road, Negombo', paymentMethod:'Credit Card (MasterCard)' },
+      ];
 
-    // Local placed orders
-    try {
-      const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
-      placed.forEach(o => {
-        const oid = o.orderId || o.id;
-        if (oid && !isDeleted(oid)) {
-          all.push({
-            id: oid,
-            status: getStatus(oid, o.status || 'pending'),
-            total: o.total || 0
-          });
+      baseDemo.forEach(d => {
+        if (!combined.some(c => (c.id || c.orderId || '').replace(/^#/, '').toUpperCase() === d.id.toUpperCase())) {
+          combined.push(d);
         }
       });
-    } catch(e) {}
+    }
 
-    // Demo orders (deduplicated)
-    for (const key in DEMO_ORDERS) {
-      if (!isDeleted(key) && !all.some(a => (a.id || '').replace(/[#\s-]/g, '').toUpperCase() === key.replace(/[#\s-]/g, '').toUpperCase())) {
-        all.push({
-          id: key,
-          status: getStatus(key, DEMO_ORDERS[key].status),
-          total: parseFloat(String(DEMO_ORDERS[key].total || '0').replace(/[^0-9.]/g, '')) || 0
-        });
+    // Deduplicate by clean ID
+    const uniqueOrders = [];
+    const seenIds = new Set();
+    for (const ord of combined) {
+      const cleanId = (ord.id || ord.orderId || '').replace(/[#\s-]/g, '').toUpperCase();
+      if (cleanId && !seenIds.has(cleanId)) {
+        seenIds.add(cleanId);
+        uniqueOrders.push(ord);
       }
     }
+    combined = uniqueOrders;
+
+    // Apply deleted orders filter
+    try {
+      const deleted = JSON.parse(localStorage.getItem('shenu_deleted_orders') || '[]');
+      combined = combined.filter(o => {
+        const clean = (o.id || o.orderId || '').replace(/[#\s-]/g, '').toUpperCase();
+        return !deleted.some(d => {
+          const cleanD = (d || '').replace(/[#\s-]/g, '').toUpperCase();
+          return clean === cleanD || clean.includes(cleanD) || cleanD.includes(clean);
+        });
+      });
+    } catch(e) {}
+
+    // Apply real-time status overrides
+    try {
+      const overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
+      combined.forEach(o => {
+        const clean = (o.id || o.orderId || '').replace(/[#\s-]/g, '').toUpperCase();
+        for (const k in overrides) {
+          const cleanK = k.replace(/[#\s-]/g, '').toUpperCase();
+          if (cleanK === clean || clean.includes(cleanK) || cleanK.includes(clean)) {
+            o.status = overrides[k].toLowerCase();
+            break;
+          }
+        }
+      });
+    } catch(e) {}
+
+    return combined;
+  }
+
+  // Helper to dynamically calculate live order counts across all statuses
+  function getLiveOrderStats() {
+    const all = getLiveStoreOrders();
 
     const counts = {
       all: all.length,
-      pending: all.filter(o => o.status === 'pending').length,
-      processing: all.filter(o => o.status === 'processing').length,
-      shipped: all.filter(o => o.status === 'shipped').length,
-      delivered: all.filter(o => o.status === 'delivered').length,
-      cancelled: all.filter(o => o.status === 'cancelled').length,
-      totalRevenue: all.reduce((sum, o) => sum + (o.total || 0), 0)
+      pending: all.filter(o => (o.status || '').toLowerCase() === 'pending').length,
+      processing: all.filter(o => (o.status || '').toLowerCase() === 'processing').length,
+      shipped: all.filter(o => (o.status || '').toLowerCase() === 'shipped').length,
+      delivered: all.filter(o => (o.status || '').toLowerCase() === 'delivered').length,
+      cancelled: all.filter(o => (o.status || '').toLowerCase() === 'cancelled').length,
+      totalRevenue: all.reduce((sum, o) => {
+        const val = typeof o.total === 'number' ? o.total : parseFloat(String(o.total || '0').replace(/[^0-9.]/g, '')) || 0;
+        return sum + val;
+      }, 0)
     };
 
     return { counts, orders: all };
@@ -4203,81 +4232,53 @@
       }
     }
 
-    // Helper to get real live status overrides from Admin operations
-    function getLiveStatus(id, defaultStatus) {
-      try {
-        const overrides = JSON.parse(localStorage.getItem('shenu_order_statuses') || '{}');
-        const cleanId = (id || '').replace(/[#\s-]/g, '').toUpperCase();
-        for (const k in overrides) {
-          const cleanK = k.replace(/[#\s-]/g, '').toUpperCase();
-          if (cleanK === cleanId || cleanK.includes(cleanId) || cleanId.includes(cleanK)) {
-            return overrides[k];
-          }
-        }
-      } catch(e) {}
-      return defaultStatus;
-    }
-
     function getCourierForStatus(status) {
       const s = (status || '').toLowerCase();
       if (s === 'pending') return 'Colombo Warehouse (Order Received & Pending Processing)';
       if (s === 'processing') return 'Fulfillment Center (Quality Check & Processing)';
-      if (s === 'shipped') return 'Pronto Delivery (In Transit to Central Hub)';
+      if (s === 'shipped') return 'Pronto Delivery (In Transit to Destination)';
       if (s === 'delivered') return 'PromptX Courier (Delivered to Recipient)';
       if (s === 'cancelled') return 'Order Cancelled (No Dispatch / Processing)';
       return 'PromptX Courier Logistics';
     }
 
-    // Check DEMO_ORDERS
-    for (const key in DEMO_ORDERS) {
-      const cleanKey = key.replace(/[#\s-]/g, '').toUpperCase();
-      const numOnly = key.replace(/\D/g, '');
-      if (clean.includes(cleanKey) || cleanKey.includes(clean) || (numOnly && clean.includes(numOnly))) {
-        const ord = { ...DEMO_ORDERS[key] };
-        ord.status = getLiveStatus(ord.id, ord.status);
-        ord.courier = getCourierForStatus(ord.status);
-        return ord;
+    // 1. Check authoritative live store orders
+    const liveOrders = getLiveStoreOrders();
+    for (const ord of liveOrders) {
+      const ordId = (ord.id || ord.orderId || '').replace(/[#\s-]/g, '').toUpperCase();
+      const numOnly = (ord.id || ord.orderId || '').replace(/\D/g, '');
+      if (clean.includes(ordId) || ordId.includes(clean) || (numOnly && clean.includes(numOnly))) {
+        let itemsText = 'Fashion Apparel';
+        if (Array.isArray(ord.items) && ord.items.length > 0) {
+          itemsText = ord.items.map(i => {
+            if (typeof i === 'string') return i;
+            return i.title || i.name || i.productTitle || i.productName || 'Fashion Item';
+          }).join(', ');
+        }
+        let dateStr = 'Recent';
+        if (ord.createdAt?.toDate) dateStr = ord.createdAt.toDate().toLocaleDateString();
+        else if (ord.date) dateStr = new Date(ord.date).toLocaleDateString();
+
+        const cust = ord.userName || (ord.shipping?.firstName ? `${ord.shipping.firstName} ${ord.shipping.lastName || ''}`.trim() : (ord.shippingAddress?.firstName ? `${ord.shippingAddress.firstName} ${ord.shippingAddress.lastName || ''}`.trim() : 'Customer'));
+
+        const numTotal = typeof ord.total === 'number' ? ord.total : parseFloat(String(ord.total || '0').replace(/[^0-9.]/g, '')) || 0;
+
+        return {
+          id: (ord.id || ord.orderId || '').replace(/^#/, ''),
+          status: (ord.status || 'processing').toLowerCase(),
+          date: dateStr,
+          customer: cust,
+          city: ord.shipping?.city || ord.shippingAddress?.city || ord.city || 'Sri Lanka',
+          address: ord.shipping?.address1 || ord.shippingAddress?.address1 || ord.address || 'Standard Shipping Address',
+          phone: ord.shipping?.phone || ord.shippingAddress?.phone || ord.phone || '+94 77 000 0000',
+          courier: ord.courier || getCourierForStatus(ord.status),
+          items: itemsText,
+          subtotal: `Rs. ${numTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          total: `Rs. ${numTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          paymentMethod: ord.paymentMethod || 'Online Payment'
+        };
       }
     }
-
-    // Check localStorage placed orders
-    try {
-      const placed = JSON.parse(localStorage.getItem('shenu_placed_orders') || '[]');
-      for (const ord of placed) {
-        const ordId = (ord.orderId || ord.id || '').replace(/[#\s-]/g, '').toUpperCase();
-        const numOnly = (ord.orderId || ord.id || '').replace(/\D/g, '');
-        if (clean.includes(ordId) || ordId.includes(clean) || (numOnly && clean.includes(numOnly))) {
-          const liveSt = getLiveStatus(ord.orderId || ord.id, ord.status || 'processing');
-          let itemsText = 'Fashion Apparel';
-          if (Array.isArray(ord.items) && ord.items.length > 0) {
-            itemsText = ord.items.map(i => {
-              if (typeof i === 'string') return i;
-              return i.title || i.name || i.productTitle || i.productName || 'Fashion Item';
-            }).join(', ');
-          }
-          let dateStr = 'Recent';
-          if (ord.createdAt?.toDate) dateStr = ord.createdAt.toDate().toLocaleDateString();
-          else if (ord.date) dateStr = new Date(ord.date).toLocaleDateString();
-
-          const cust = (ord.shipping?.firstName ? `${ord.shipping.firstName} ${ord.shipping.lastName || ''}`.trim() : (ord.shippingAddress?.firstName ? `${ord.shippingAddress.firstName} ${ord.shippingAddress.lastName || ''}`.trim() : (ord.userName || 'Customer')));
-
-          return {
-            id: ord.orderId || ord.id,
-            status: liveSt,
-            date: dateStr,
-            customer: cust,
-            city: ord.shipping?.city || ord.shippingAddress?.city || ord.city || 'Sri Lanka',
-            address: ord.shipping?.address1 || ord.shippingAddress?.address1 || 'Standard Shipping Address',
-            phone: ord.shipping?.phone || ord.shippingAddress?.phone || '+94 77 000 0000',
-            courier: getCourierForStatus(liveSt),
-            items: itemsText,
-            subtotal: `Rs. ${(ord.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-            total: `Rs. ${(ord.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-            paymentMethod: ord.paymentMethod || 'Online Payment'
-          };
-        }
-      }
-    } catch(e) {}
 
     // Fallback if 4-6 digits provided specifically in tracking context
     const digitMatch = query.match(/(\d{4,6})/);
@@ -4285,19 +4286,18 @@
       const num = digitMatch[1];
       const synOrder = {
         id: `ORD-00${num}`,
-        status: getLiveStatus(`ORD-00${num}`, 'shipped'),
+        status: 'shipped',
         date: 'Oct 14, 2026',
         customer: 'Kamal Gunaratne',
         city: 'Maharagama, Colombo',
         address: '45 Temple Road, Maharagama',
         phone: '+94 71 892 4355',
-        courier: getCourierForStatus(getLiveStatus(`ORD-00${num}`, 'shipped')),
+        courier: getCourierForStatus('shipped'),
         items: 'Luxe Satin Cocktail Party Dress',
         subtotal: 'Rs. 6,800.00',
         total: 'Rs. 6,800.00',
         paymentMethod: 'Cash on Delivery (COD)'
       };
-      DEMO_ORDERS[synOrder.id] = synOrder;
       return synOrder;
     }
 
@@ -4881,24 +4881,28 @@
 
     // ------------------------------------------------------------
     // INTENT: LIVE ORDER STATS & STATUS BREAKDOWNS
-    // ("how many orders in pending", "how many pending orders", "total orders", "orders count")
+    // ("how many orders in pending", "how many pending orders", "how many orders in shiped", "orders count")
     // Tested BEFORE single-order tracking so queries asking about orders count are answered accurately!
     // ------------------------------------------------------------
-    const isOrderStatsQuery = /how many (orders|order)|total orders?|orders? (count|stats|statistics|summary|breakdown|ganana|keeyak)|(pending|processing|shipped|delivered|cancelled) orders?|orders? in (pending|processing|shipped|delivered|cancelled)|order status summary/i.test(q);
+    const isOrderStatsQuery = /how many (orders|order)|total orders?|orders? (count|stats|statistics|summary|breakdown|ganana|keeyak)|(pending|processing|shipped|shiped|delivered|deliverd|cancelled|canceled) orders?|orders? in (pending|processing|shipped|shiped|delivered|deliverd|cancelled|canceled)|(pending|processing|shipped|shiped|delivered|deliverd|cancelled|canceled) (keeyada|kiyak|koccara|count)|order status summary/i.test(q);
 
     if (isOrderStatsQuery) {
       const statsData = getLiveOrderStats();
       const counts = statsData.counts;
       const allOrdersList = statsData.orders;
 
-      // Check if user asked about a specific status
-      const statusMatch = q.match(/\b(pending|processing|shipped|delivered|cancelled)\b/i);
+      // Check if user asked about a specific status (with flexible typo matching)
+      let targetStatus = null;
+      if (/(pending|pendin|pendng)/i.test(q)) targetStatus = 'pending';
+      else if (/(processing|procesing|process)/i.test(q)) targetStatus = 'processing';
+      else if (/(shipped|shiped|shipping|ship|dispatch)/i.test(q)) targetStatus = 'shipped';
+      else if (/(delivered|deliverd|deliver|complete)/i.test(q)) targetStatus = 'delivered';
+      else if (/(cancelled|canceled|cancel)/i.test(q)) targetStatus = 'cancelled';
 
-      if (statusMatch) {
-        const targetStatus = statusMatch[1].toLowerCase();
+      if (targetStatus) {
         const count = counts[targetStatus] || 0;
-        const matchingOrders = allOrdersList.filter(o => o.status === targetStatus);
-        const orderIds = matchingOrders.map(o => `#${o.id}`).join(', ');
+        const matchingOrders = allOrdersList.filter(o => (o.status || '').toLowerCase() === targetStatus);
+        const orderIds = matchingOrders.map(o => `#${(o.id || o.orderId || '').replace(/^#/, '')}`).join(', ');
 
         const statusIcons = {
           pending: '⏳',
@@ -4919,12 +4923,23 @@
         const color = statusColors[targetStatus] || 'var(--color-gold)';
         const statusTitle = targetStatus.charAt(0).toUpperCase() + targetStatus.slice(1);
 
-        let ordersDetail = '';
-        if (matchingOrders.length > 0) {
-          ordersDetail = `
+        let detailsBox = '';
+        if (count > 0) {
+          detailsBox = `
             <div style="margin-top:8px; font-size:12.5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px;">
               <div><strong>Matching Order IDs:</strong> <span style="color:${color}; font-weight:600;">${orderIds}</span></div>
               <div style="font-size:11.5px; color:var(--color-text-muted); margin-top:4px;">Type <em>"status &lt;Order-ID&gt;"</em> to view full tracking and invoice details.</div>
+            </div>
+          `;
+        } else {
+          detailsBox = `
+            <div style="margin-top:8px; font-size:12.5px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; line-height:1.7;">
+              <div style="font-weight:600; margin-bottom:4px;">📦 Current Database Orders Breakdown:</div>
+              <div>• ⚙️ <strong>Processing:</strong> <strong style="color:#F59E0B;">${counts.processing}</strong> order(s)</div>
+              <div>• 🚚 <strong>Shipped:</strong> <strong style="color:#60A5FA;">${counts.shipped}</strong> order(s)</div>
+              <div>• ✅ <strong>Delivered:</strong> <strong style="color:#4CAF6E;">${counts.delivered}</strong> order(s)</div>
+              <div>• ❌ <strong>Cancelled:</strong> <strong style="color:#EF4444;">${counts.cancelled}</strong> order(s)</div>
+              <div style="margin-top:4px; font-weight:700; color:var(--color-gold);">Total Active Database Orders: ${counts.all}</div>
             </div>
           `;
         }
@@ -4932,9 +4947,9 @@
         return `
           <p>${icon} <strong>Live ${statusTitle} Orders Intelligence:</strong></p>
           <p style="font-size:13.5px; line-height:1.6; margin:6px 0;">
-            There are currently <strong style="color:${color}; font-size:16px;">${count} order(s)</strong> in <strong>${statusTitle}</strong> status in our live system.
+            There are currently <strong style="color:${color}; font-size:16px;">${count} order(s)</strong> in <strong>${statusTitle}</strong> status in our database.
           </p>
-          ${ordersDetail}
+          ${detailsBox}
           <div style="margin-top:10px;">
             <a href="${isAdminPage ? 'orders.html' : 'pages/admin/orders.html'}" class="chat-order-track-btn" style="text-decoration:none;">
               <span>Open Manage Orders Dashboard &rarr;</span>
@@ -4950,10 +4965,10 @@
           Our system is currently tracking <strong style="color:var(--color-gold); font-size:15px;">${counts.all} total orders</strong>:
         </p>
         <ul style="margin:0 0 12px 18px; padding:0; font-size:12.5px; line-height:1.8;">
-          <li>⏳ <strong>Pending Orders:</strong> <strong style="color:#C9A96E;">${counts.pending}</strong> (Awaiting warehouse dispatch)</li>
-          <li>⚙️ <strong>Processing Orders:</strong> <strong style="color:#F59E0B;">${counts.processing}</strong> (Fulfillment quality check)</li>
-          <li>🚚 <strong>Shipped Orders:</strong> <strong style="color:#60A5FA;">${counts.shipped}</strong> (In courier transit)</li>
-          <li>✅ <strong>Delivered Orders:</strong> <strong style="color:#4CAF6E;">${counts.delivered}</strong> (Completed)</li>
+          <li>⏳ <strong>Pending Orders:</strong> <strong style="color:#C9A96E;">${counts.pending}</strong></li>
+          <li>⚙️ <strong>Processing Orders:</strong> <strong style="color:#F59E0B;">${counts.processing}</strong></li>
+          <li>🚚 <strong>Shipped Orders:</strong> <strong style="color:#60A5FA;">${counts.shipped}</strong></li>
+          <li>✅ <strong>Delivered Orders:</strong> <strong style="color:#4CAF6E;">${counts.delivered}</strong></li>
           <li>❌ <strong>Cancelled Orders:</strong> <strong style="color:#EF4444;">${counts.cancelled}</strong></li>
         </ul>
         <div style="margin-top:10px;">
