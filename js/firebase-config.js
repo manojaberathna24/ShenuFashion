@@ -21,7 +21,7 @@ import { getStorage }     from "https://www.gstatic.com/firebasejs/10.12.0/fireb
 
 // ✅ Firebase config — shenu-fashion-store
 const firebaseConfig = {
-  apiKey: "eefefwfsds",
+  apiKey: "AIzaSyCsWqwhyUMW35vsYhKmJ1e_1qd9HTKc0oc",
   authDomain: "shenu-fashion-store.firebaseapp.com",
   projectId: "shenu-fashion-store",
   storageBucket: "shenu-fashion-store.firebasestorage.app",

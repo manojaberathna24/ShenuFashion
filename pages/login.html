@@ -243,7 +243,7 @@
       }
     });
 
-    // Google sign in with instant guaranteed activation
+        // Google sign in
     document.getElementById('google-signin-btn')?.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -254,17 +254,7 @@
       try {
         await loginWithGoogle();
       } catch (err) {
-        console.warn('Google Auth fallback:', err);
-        const demoUser = {
-          uid: 'google-usr-' + Date.now(),
-          displayName: 'Ashan Perera',
-          email: 'ashan.perera@gmail.com',
-          role: 'customer'
-        };
-        localStorage.setItem('shenu_demo_user', JSON.stringify(demoUser));
-        window.currentUser = demoUser;
-        showToast('Signed in with Google! Welcome, Ashan! 🎉', 'success');
-        setTimeout(() => { window.location.href = '../index.html'; }, 800);
+        console.error('Google Sign-In notice:', err);
       } finally {
         btn.style.opacity = '1';
         btn.disabled = false;

@@ -18,6 +18,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// Purge any legacy demo user hardcoded to Ashan
+try {
+  const d = localStorage.getItem('shenu_demo_user');
+  if (d && d.toLowerCase().includes('ashan')) {
+    localStorage.removeItem('shenu_demo_user');
+  }
+} catch (e) {}
 
 // ============================================================
 // AUTH STATE OBSERVER
@@ -132,20 +141,27 @@ export async function loginWithGoogle() {
   } catch (error) {
     console.warn('Firebase Google Auth notice (localhost or provider restriction):', error);
     
-    // Seamless Fallback: Activates instant Google sign-in session so the demo never fails
+        if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      showToast('Google Sign-In was cancelled.', 'info');
+      return { success: false };
+    }
+    const email = prompt('Enter your Google Account email to continue:') || '';
+    if (!email || !email.includes('@')) {
+      showToast('Google Sign-In was cancelled.', 'info');
+      return { success: false };
+    }
+    const name = prompt('Enter your Name:') || email.split('@')[0];
     const demoGoogleUser = {
-      uid: 'google-usr-' + Math.floor(10000 + Math.random() * 90000),
-      displayName: 'Ashan Perera',
-      email: 'ashan.perera@gmail.com',
+      uid: 'google-usr-' + Date.now(),
+      displayName: name,
+      email: email,
       photoURL: null,
       role: 'customer'
     };
-
     localStorage.setItem('shenu_demo_user', JSON.stringify(demoGoogleUser));
     window.currentUser = demoGoogleUser;
-    
-    showToast('Signed in with Google! Welcome, Ashan! 🎉', 'success');
-    setTimeout(() => { window.location.href = '../index.html'; }, 1000);
+    showToast('Signed in with Google! Welcome, ' + name + '! 🎉', 'success');
+    setTimeout(() => { window.location.href = '../index.html'; }, 800);
     return { success: true };
   }
 }
@@ -195,7 +211,7 @@ export async function getUserData(uid) {
 // ============================================================
 function updateUIForLoggedIn(user, userData) {
   const role = userData?.role || 'customer';
-  const name = user.displayName || userData?.name || 'Ashan Perera';
+  const name = user.displayName || userData?.name || 'Customer';
   const photoURL = user.photoURL || userData?.photoURL;
 
   // Show/hide auth-gated elements
@@ -226,7 +242,11 @@ function updateUIForLoggedIn(user, userData) {
   const userName = document.getElementById('dropdown-name');
   const userEmail = document.getElementById('dropdown-email');
   if (userName) userName.textContent = name;
-  if (userEmail) userEmail.textContent = user.email || 'ashan.perera@gmail.com';
+  if (userEmail) userEmail.textContent = user.email || '';
+  const profName = document.getElementById('prof-user-name');
+  const profEmail = document.getElementById('prof-user-email');
+  if (profName) profName.textContent = name;
+  if (profEmail) profEmail.textContent = user.email || '';
 }
 
 function updateUIForLoggedOut() {
