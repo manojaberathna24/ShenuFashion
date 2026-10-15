@@ -460,28 +460,42 @@ function promptGoogleAccountModal() {
 }
 
 export async function loginWithGoogle() {
-  // Use signInWithRedirect as PRIMARY method.
-  // This takes the user to Google's REAL account chooser page (accounts.google.com)
-  // where all signed-in browser Google accounts appear — user just clicks one to SSO login.
-  // No popup, no email typing needed. Works on any domain including GitHub Pages.
+  // Strategy: Try popup first (instant, no page reload).
+  // If popup is blocked/unauthorized domain → signInWithRedirect (real Google account page).
+  // getRedirectResult (above) handles the return.
+  // No fake modals. No email typing. Only real Google accounts.
+
   try {
-    showToast('Opening Google Sign-in...', 'info');
-    await signInWithRedirect(auth, googleProvider);
-    // Page will redirect to Google and come back — getRedirectResult handles the result
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    await _handleGoogleUser(user);
     return { success: true };
-  } catch (error) {
-    console.warn('signInWithRedirect failed, falling back to popup:', error);
-    // Fallback to popup (works on localhost and authorized domains)
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      await _handleGoogleUser(user);
-      return { success: true };
-    } catch (popupError) {
-      console.warn('Popup also failed:', popupError);
-      // Last resort: manual account picker modal (offline/demo use)
-      return await promptGoogleAccountModal();
+  } catch (popupErr) {
+    const code = popupErr?.code || '';
+    console.warn('Google popup error:', code, popupErr.message);
+
+    // These errors mean: popup was blocked OR domain not authorized OR env doesn't support popups
+    // Solution: signInWithRedirect → takes user to real Google account chooser (accounts.google.com)
+    // All browser-signed-in Google accounts appear there — click one → SSO done
+    const useRedirect =
+      code === 'auth/popup-blocked' ||
+      code === 'auth/popup-closed-by-user' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/unauthorized-domain' ||
+      code === 'auth/operation-not-supported-in-this-environment' ||
+      code === 'auth/web-storage-unsupported';
+
+    if (useRedirect) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return { success: true }; // Page redirects, getRedirectResult handles on return
+      } catch (redirectErr) {
+        console.warn('Redirect also failed:', redirectErr);
+      }
     }
+
+    // Only if BOTH popup and redirect fail (e.g., completely offline) → show our modal
+    return await promptGoogleAccountModal();
   }
 }
 
