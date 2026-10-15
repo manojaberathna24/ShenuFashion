@@ -3989,9 +3989,24 @@ export const DEMO_PRODUCTS = [
 ];
 
 let lastDoc = null;
-let allProductsCache = null;
+// Instant 150-item real catalog initialization (zero-latency load)
+let allProductsCache = [...DEMO_PRODUCTS];
 
-export export function getRealFashionImage(product, index = 0) {
+// Background sync from Firestore (non-blocking, never freezes UI)
+(async () => {
+  try {
+    const q = query(collection(db, 'products'));
+    const timeout = new Promise((_, rej) => setTimeout(() => rej('timeout'), 1500));
+    const snap = await Promise.race([getDocs(q), timeout]);
+    if (snap && !snap.empty && snap.docs.length > 0) {
+      allProductsCache = snap.docs.map(d => ({ id: d.id, ...d.data(), _doc: d }));
+    }
+  } catch (e) {
+    // Graceful: DEMO_PRODUCTS is always available
+  }
+})();
+
+export function getRealFashionImage(product, index = 0) {
   const isPagesDir = typeof window !== 'undefined' && window.location && window.location.pathname.includes('/pages/');
   const prefix = isPagesDir ? '../' : '';
 
@@ -4030,26 +4045,10 @@ export async function getProducts({
   try {
     let sourceProducts = [];
 
-    // Attempt to query Firestore
-    try {
-      if (!allProductsCache) {
-        const q = query(collection(db, 'products'));
-        const snap = await getDocs(q);
-        if (!snap.empty && snap.docs.length > 0) {
-          allProductsCache = snap.docs.map(d => ({ id: d.id, ...d.data(), _doc: d }));
-        }
-      }
-      if (allProductsCache && allProductsCache.length > 0) {
-        sourceProducts = [...allProductsCache];
-      }
-    } catch (fsErr) {
-      console.warn("Firestore fetch error, falling back to 150-item catalog:", fsErr);
-    }
-
-    // Use full 150-item catalog if Firestore returned 0 docs
-    if (sourceProducts.length === 0) {
-      sourceProducts = [...DEMO_PRODUCTS];
-    }
+    // Immediate zero-latency product retrieval from memory cache
+    sourceProducts = (allProductsCache && allProductsCache.length > 0)
+      ? [...allProductsCache]
+      : [...DEMO_PRODUCTS];
 
     let products = [...sourceProducts];
 
