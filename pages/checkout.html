@@ -585,6 +585,7 @@
     let selectedPayment = 'card';
     let appliedCoupon = null;
     let placedOrderObject = null;
+    let productMap = {};
 
     // Load cart items on page load
     window.lastCalculatedTotals = { subtotal: 0, delivery: 0, discount: 0, total: 0 };
@@ -611,7 +612,7 @@
         'd3': { name:'Leather Crossbody Bag', price:6500 }, 'd4': { name:'Silk Evening Blouse', price:5200 },
       };
 
-      const productMap = {};
+      productMap = {};
       products.forEach(p => productMap[p.id] = p);
 
       let subtotal = 0;
@@ -902,7 +903,7 @@
       selectedPayment = paymentMethod;
       const rawCart = getLocalCart();
       const enrichedCartItems = (rawCart.length > 0 ? rawCart : [{ name: 'Floral Summer Dress', quantity: 1, price: 3200, size: 'M', color: 'Gold' }]).map(item => {
-        const prod = productMap[item.productId] || {};
+        const prod = (typeof productMap !== 'undefined' && productMap && productMap[item.productId]) ? productMap[item.productId] : {};
         return {
           productId: item.productId || 'item',
           name: prod.name || item.name || 'Fashion Apparel',
