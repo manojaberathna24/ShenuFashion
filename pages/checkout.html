@@ -602,9 +602,14 @@
       }
 
       const coupons = {
-        'SHENU10':   { code: 'SHENU10', type: 'percentage', value: 10, label: '10% OFF' },
-        'WELCOME20': { code: 'WELCOME20', type: 'percentage', value: 20, label: '20% OFF' },
-        'FREESHIP':  { code: 'FREESHIP', type: 'shipping', value: 0, label: 'FREE DELIVERY' },
+        'SHENU10':    { code: 'SHENU10', type: 'percentage', value: 10, label: '10% OFF' },
+        'SHENU20':    { code: 'SHENU20', type: 'percentage', value: 20, label: '20% OFF' },
+        'WELCOME20':  { code: 'WELCOME20', type: 'percentage', value: 20, label: '20% OFF' },
+        'FREESHIP':   { code: 'FREESHIP', type: 'shipping', value: 0, label: 'FREE DELIVERY' },
+        'FASHION50':  { code: 'FASHION50', type: 'fixed', value: 500, label: 'Rs. 500 OFF' },
+        'FASHION500': { code: 'FASHION500', type: 'fixed', value: 500, label: 'Rs. 500 OFF' },
+        'SAVE10':     { code: 'SAVE10', type: 'percentage', value: 10, label: '10% OFF' },
+        'SAVE20':     { code: 'SAVE20', type: 'percentage', value: 20, label: '20% OFF' }
       };
 
       if (!coupons[code]) {
