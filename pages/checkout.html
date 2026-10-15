@@ -486,6 +486,14 @@
     // Load cart items on page load
     window.lastCalculatedTotals = { subtotal: 0, delivery: 0, discount: 0, total: 0 };
     
+    // Check if user already applied a coupon on the cart page
+    try {
+      const savedCoupon = sessionStorage.getItem('shenu_checkout_coupon');
+      if (savedCoupon) {
+        appliedCoupon = JSON.parse(savedCoupon);
+      }
+    } catch(e) {}
+
     async function loadCheckoutSummary() {
       const cart = getLocalCart();
       const productIds = [...new Set(cart.map(i => i.productId))];

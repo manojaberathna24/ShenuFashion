@@ -290,15 +290,43 @@
       lucide.createIcons();
     }
 
+    let currentAppliedCoupon = null;
+
+    // Load previously applied coupon from session
+    try {
+      const savedCoupon = sessionStorage.getItem('shenu_checkout_coupon');
+      if (savedCoupon) {
+        currentAppliedCoupon = JSON.parse(savedCoupon);
+      }
+    } catch(e) {}
+
+    const AVAILABLE_COUPONS = {
+      'SHENU10':   { code: 'SHENU10', type: 'percentage', value: 10, label: '10% OFF' },
+      'WELCOME20': { code: 'WELCOME20', type: 'percentage', value: 20, label: '20% OFF' },
+      'FREESHIP':  { code: 'FREESHIP', type: 'shipping', value: 0, label: 'FREE DELIVERY' },
+      'FASHION50': { code: 'FASHION50', type: 'fixed', value: 500, label: 'Rs. 500 OFF' }
+    };
+
     function updateSummary(items) {
       const subtotal = items.reduce((sum, item) => {
         const price = item.product?.salePrice || item.product?.price || 0;
         return sum + price * (item.quantity || 1);
       }, 0);
 
-      const delivery = subtotal >= 5000 ? 0 : 350;
-      const total    = subtotal + delivery;
+      let delivery = subtotal >= 5000 || subtotal === 0 ? 0 : 350;
+      let discount = 0;
 
+      if (currentAppliedCoupon) {
+        if (currentAppliedCoupon.type === 'percentage') {
+          discount = Math.round(subtotal * (currentAppliedCoupon.value / 100));
+        } else if (currentAppliedCoupon.type === 'fixed') {
+          discount = Math.min(currentAppliedCoupon.value, subtotal);
+        } else if (currentAppliedCoupon.type === 'shipping') {
+          delivery = 0;
+        }
+      }
+
+      const total = Math.max(0, subtotal - discount + delivery);
       const count = items.reduce((s, i) => s + (i.quantity || 1), 0);
 
       document.getElementById('cart-subtitle').textContent  = `${count} item${count !== 1 ? 's' : ''} in your cart`;
@@ -306,8 +334,14 @@
       document.getElementById('subtotal').textContent       = window.formatCurrency(subtotal);
       document.getElementById('delivery-fee').textContent   = delivery === 0 ? 'FREE' : window.formatCurrency(delivery);
       document.getElementById('delivery-fee').style.color   = delivery === 0 ? 'var(--color-success)' : 'var(--color-text)';
-      document.getElementById('discount-amount').textContent= '- ' + window.formatCurrency(0);
+      document.getElementById('discount-amount').textContent= '- ' + window.formatCurrency(discount);
+      document.getElementById('discount-amount').style.color= discount > 0 ? '#10B981' : 'var(--color-accent)';
       document.getElementById('total-amount').textContent   = window.formatCurrency(total);
+
+      const couponInput = document.getElementById('coupon-code');
+      if (couponInput && currentAppliedCoupon && !couponInput.value) {
+        couponInput.value = currentAppliedCoupon.code;
+      }
     }
 
     window.changeQty = (productId, qty, size, color) => {
@@ -331,12 +365,26 @@
     };
 
     window.applyCoupon = () => {
-      const code = document.getElementById('coupon-code').value.trim().toUpperCase();
-      if (code === 'SHENU10') {
-        showToast('Coupon applied! 10% discount added.', 'success', 'Coupon');
-      } else {
-        showToast('Invalid coupon code.', 'error');
+      const input = document.getElementById('coupon-code');
+      const code = (input.value || '').trim().toUpperCase();
+      if (!code) {
+        showToast('Please enter a coupon code (e.g. SHENU10 or WELCOME20)', 'warning');
+        return;
       }
+
+      const coupon = AVAILABLE_COUPONS[code];
+      if (!coupon) {
+        showToast('Invalid coupon code. Try SHENU10, WELCOME20, or FREESHIP', 'error');
+        return;
+      }
+
+      currentAppliedCoupon = coupon;
+      try {
+        sessionStorage.setItem('shenu_checkout_coupon', JSON.stringify(coupon));
+      } catch(e) {}
+
+      updateSummary(cartProducts);
+      showToast(`Coupon ${coupon.code} applied! ${coupon.label} deducted from total.`, 'success', 'Promo Code');
     };
 
     // Listen for cart changes

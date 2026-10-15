@@ -5112,14 +5112,32 @@
       `;
     }
 
-    if (/payment|pay|card|koko|cash|cod|visa|master|gewanna|salli|discount|coupon|promo/i.test(q)) {
+    if (/coupon|promo|discount code|voucher|offer code/i.test(q)) {
       return `
-        <p>💳 <strong>Payment Options & Promo Discounts:</strong></p>
+        <p>🎟️ <strong>Active Shenu Fashion Promo & Coupon Codes:</strong></p>
+        <div style="font-size:13px; line-height:1.6; margin:6px 0 10px 0;">
+          You can use any of these verified coupon codes in your <strong>Shopping Cart</strong> or <strong>Checkout</strong> to get an instant discount:
+        </div>
+        <ul style="margin:0 0 12px 18px; padding:0; font-size:12.5px; line-height:1.9;">
+          <li>🏷️ <strong style="color:var(--color-gold); font-size:14px;">SHENU10</strong> &mdash; <strong>10% OFF</strong> on your entire order total</li>
+          <li>🏷️ <strong style="color:var(--color-gold); font-size:14px;">WELCOME20</strong> &mdash; <strong>20% OFF</strong> exclusive customer discount</li>
+          <li>🚚 <strong style="color:var(--color-gold); font-size:14px;">FREESHIP</strong> &mdash; <strong>FREE Delivery</strong> across Sri Lanka (saves Rs. 350)</li>
+          <li>💵 <strong style="color:var(--color-gold); font-size:14px;">FASHION50</strong> &mdash; <strong>Rs. 500 Flat OFF</strong> instant price deduction</li>
+        </ul>
+        <p style="font-size:12px; color:var(--color-text-muted); margin:0;">
+          💡 Simply type the code in the <em>"Coupon code"</em> box and click <strong>Apply</strong>!
+        </p>
+      `;
+    }
+
+    if (/payment|pay|card|koko|cash|cod|visa|master|gewanna|salli/i.test(q)) {
+      return `
+        <p>💳 <strong>Payment Options & Gateways:</strong></p>
         <ul style="margin:6px 0 0 16px; padding:0; font-size:13px; line-height:1.7;">
           <li><strong>Cards:</strong> Visa, MasterCard, and American Express (SSL encrypted).</li>
           <li><strong>Cash on Delivery (COD):</strong> Pay at your doorstep upon receiving the parcel.</li>
           <li><strong>Koko Pay:</strong> 3 equal monthly installments with 0% interest.</li>
-          <li><strong>Promo Code:</strong> Use code <strong style="color:var(--color-gold);">SHENU10</strong> at checkout for <strong>10% OFF</strong>!</li>
+          <li><strong>Promo Code:</strong> Use code <strong style="color:var(--color-gold);">SHENU10</strong> for <strong>10% OFF</strong>!</li>
         </ul>
       `;
     }
