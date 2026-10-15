@@ -29,6 +29,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
     const result = await getRedirectResult(auth);
     if (result && result.user) {
       const user = result.user;
+      // Handle user data and UI after redirect from Google
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (!userDoc.exists()) {
         await setDoc(doc(db, 'users', user.uid), {
@@ -48,6 +49,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
       saveGoogleAccount(acc);
       localStorage.removeItem('shenu_demo_user');
       window.currentUser = { ...user, role: 'customer' };
+      showToast(`Welcome, ${user.displayName?.split(' ')[0] || 'User'}! 🎉`, 'success');
     }
   } catch (e) {
     // Redirect result not available or already handled
@@ -458,63 +460,57 @@ function promptGoogleAccountModal() {
 }
 
 export async function loginWithGoogle() {
+  // Use signInWithRedirect as PRIMARY method.
+  // This takes the user to Google's REAL account chooser page (accounts.google.com)
+  // where all signed-in browser Google accounts appear — user just clicks one to SSO login.
+  // No popup, no email typing needed. Works on any domain including GitHub Pages.
   try {
-    // Attempt Firebase popup — works natively when browser allows it
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (!userDoc.exists()) {
-      await setDoc(doc(db, 'users', user.uid), {
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        role: 'customer',
-        addresses: [],
-        wishlist: [],
-        createdAt: serverTimestamp(),
-      });
+    showToast('Opening Google Sign-in...', 'info');
+    await signInWithRedirect(auth, googleProvider);
+    // Page will redirect to Google and come back — getRedirectResult handles the result
+    return { success: true };
+  } catch (error) {
+    console.warn('signInWithRedirect failed, falling back to popup:', error);
+    // Fallback to popup (works on localhost and authorized domains)
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      await _handleGoogleUser(user);
+      return { success: true };
+    } catch (popupError) {
+      console.warn('Popup also failed:', popupError);
+      // Last resort: manual account picker modal (offline/demo use)
+      return await promptGoogleAccountModal();
     }
+  }
+}
 
-    const acc = {
-      uid: user.uid,
-      displayName: user.displayName,
+async function _handleGoogleUser(user) {
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  if (!userDoc.exists()) {
+    await setDoc(doc(db, 'users', user.uid), {
+      name: user.displayName,
       email: user.email,
       photoURL: user.photoURL,
-      role: 'customer'
-    };
-    saveGoogleAccount(acc);
-    localStorage.removeItem('shenu_demo_user');
-    window.currentUser = { ...user, role: 'customer' };
-    showToast(`Welcome, ${user.displayName?.split(' ')[0] || 'User'}! 🎉`, 'success');
-    const homeUrl = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
-    setTimeout(() => { window.location.href = homeUrl; }, 800);
-    return { success: true };
-  } catch (popupError) {
-    const code = popupError?.code || '';
-    // If popup was blocked by browser or domain not authorized → use full-page Google redirect
-    // This is the REAL Google account chooser (shows actual signed-in browser accounts)
-    if (
-      code === 'auth/popup-blocked' ||
-      code === 'auth/popup-closed-by-user' ||
-      code === 'auth/cancelled-popup-request' ||
-      code === 'auth/unauthorized-domain' ||
-      code === 'auth/operation-not-supported-in-this-environment'
-    ) {
-      try {
-        // signInWithRedirect triggers the REAL Google account picker from Google's servers
-        // and redirects back to this page — this reads ACTUAL signed-in browser accounts
-        showToast('Redirecting to Google Sign-in...', 'info');
-        await signInWithRedirect(auth, googleProvider);
-        return { success: true }; // page will reload via redirect
-      } catch (redirectErr) {
-        console.warn('Redirect also failed, opening account picker modal:', redirectErr);
-      }
-    }
-    // Final fallback: our custom in-app account picker modal (for offline/demo/viva use)
-    console.warn('Firebase Google Auth popup notice:', popupError);
-    return await promptGoogleAccountModal();
+      role: 'customer',
+      addresses: [],
+      wishlist: [],
+      createdAt: serverTimestamp(),
+    });
   }
+  const acc = {
+    uid: user.uid,
+    displayName: user.displayName,
+    email: user.email,
+    photoURL: user.photoURL,
+    role: 'customer'
+  };
+  saveGoogleAccount(acc);
+  localStorage.removeItem('shenu_demo_user');
+  window.currentUser = { ...user, role: 'customer' };
+  showToast(`Welcome, ${user.displayName?.split(' ')[0] || 'User'}! 🎉`, 'success');
+  const homeUrl = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+  setTimeout(() => { window.location.href = homeUrl; }, 800);
 }
 
 // LOGOUT
