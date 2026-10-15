@@ -4,50 +4,74 @@
    ============================================================ */
 
 /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
 /* ============================================================
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ============================================================ */
 :root {
-  /* Colors */
-  --color-bg:           #0F0F1A;
-  --color-bg-alt:       #13131F;
-  --color-surface:      #1A1A2E;
-  --color-surface-2:    #1E1E35;
-  --color-surface-3:    #252540;
-  --color-border:       rgba(201, 169, 110, 0.12);
-  --color-border-hover: rgba(201, 169, 110, 0.35);
+  /* ============================================================
+     FIGMA MAKE APP SIGNATURE TOKENS (Shenu Fashion Luxe)
+     ============================================================ */
+  --color-brand:        #E11A45;       /* Luxury Crimson / Berry Ruby */
+  --color-brand-light:  #FF4D79;
+  --color-brand-dark:   #BA0F36;
+  --color-brand-glow:   rgba(225, 26, 69, 0.28);
 
-  --color-gold:         #C9A96E;
-  --color-gold-light:   #E0C490;
-  --color-gold-dark:    #B8860B;
-  --color-gold-glow:    rgba(201, 169, 110, 0.15);
+  --color-yellow:       #EDC92C;       /* Warm Honey Gold / Radiant Yellow */
+  --color-yellow-light: #FBE676;
+  --color-yellow-dark:  #C49B0A;
+  --color-yellow-glow:  rgba(237, 201, 44, 0.25);
 
-  --color-accent:       #E94560;
-  --color-accent-light: #FF6B84;
-  --color-accent-dark:  #C4293F;
-  --color-accent-glow:  rgba(233, 69, 96, 0.15);
+  --color-cream:        #EFECD7;       /* Champagne Linen / Warm Ivory */
+  --color-pink:         #E3AFC9;       /* Soft Blush Rose / Chic Pastel */
+  --color-pink-light:   #F7DCE9;
+  --color-pink-glow:    rgba(227, 175, 201, 0.25);
 
-  --color-text:         #F0EDE8;
-  --color-text-muted:   #9A9AB0;
-  --color-text-faint:   #5A5A72;
+  --color-ink:          #1F1B1C;       /* Deep Obsidian Charcoal */
+  --color-ink-soft:     #2B2628;
 
-  --color-success:      #4CAF6E;
+  /* Base Dark Palette (Infused with Figma Obsidian & Golden Glow) */
+  --color-bg:           #131114;
+  --color-bg-alt:       #1A171B;
+  --color-surface:      #231F24;
+  --color-surface-2:    #2C262E;
+  --color-surface-3:    #38313A;
+  --color-border:       rgba(237, 201, 44, 0.16);
+  --color-border-hover: rgba(237, 201, 44, 0.42);
+
+  --color-gold:         #EDC92C;
+  --color-gold-light:   #FBE676;
+  --color-gold-dark:    #C49B0A;
+  --color-gold-glow:    rgba(237, 201, 44, 0.24);
+
+  --color-accent:       #E11A45;
+  --color-accent-light: #FF4D79;
+  --color-accent-dark:  #BA0F36;
+  --color-accent-glow:  rgba(225, 26, 69, 0.25);
+
+  --color-text:         #F8F6EF;
+  --color-text-muted:   #B0ACA5;
+  --color-text-faint:   #736D6B;
+
+  --color-success:      #10B981;
   --color-warning:      #F59E0B;
   --color-error:        #EF4444;
-  --color-info:         #60A5FA;
+  --color-info:         #3B82F6;
 
-  /* Gradients */
-  --gradient-gold:      linear-gradient(135deg, #C9A96E 0%, #E0C490 50%, #A8854A 100%);
-  --gradient-accent:    linear-gradient(135deg, #E94560 0%, #FF6B84 100%);
-  --gradient-hero:      linear-gradient(135deg, #0F0F1A 0%, #1A1A2E 50%, #0F0F1A 100%);
-  --gradient-card:      linear-gradient(145deg, rgba(30,30,53,0.9) 0%, rgba(26,26,46,0.7) 100%);
-  --gradient-ai:        linear-gradient(135deg, #C9A96E 0%, #E94560 100%);
-  --gradient-shimmer:   linear-gradient(90deg, transparent, rgba(201,169,110,0.08), transparent);
+  /* Signature Gradients */
+  --gradient-gold:      linear-gradient(135deg, #EDC92C 0%, #F59E0B 60%, #D97706 100%);
+  --gradient-brand:     linear-gradient(135deg, #E11A45 0%, #FF4D79 100%);
+  --gradient-accent:    linear-gradient(135deg, #E11A45 0%, #EDC92C 100%);
+  --gradient-pink:      linear-gradient(135deg, #E3AFC9 0%, #F7DCE9 100%);
+  --gradient-hero:      linear-gradient(135deg, #131114 0%, #1F1B1C 50%, #2A2127 100%);
+  --gradient-card:      linear-gradient(145deg, rgba(35,31,36,0.95) 0%, rgba(27,23,28,0.85) 100%);
+  --gradient-ai:        linear-gradient(135deg, #EDC92C 0%, #E11A45 100%);
+  --gradient-shimmer:   linear-gradient(90deg, transparent, rgba(237,201,44,0.12), transparent);
 
   /* Typography */
-  --font-heading:       'Outfit', sans-serif;
+  --font-display:       'Playfair Display', Georgia, serif;
+  --font-heading:       'Playfair Display', 'Outfit', Georgia, serif;
   --font-body:          'DM Sans', sans-serif;
 
   --text-xs:    0.75rem;
@@ -693,40 +717,42 @@ input, textarea, select, button {
 [data-theme="light"],
 html[data-theme="light"],
 body[data-theme="light"] {
-  --color-bg:           #F8F9FC;
-  --color-bg-alt:       #FFFFFF;
+  --color-bg:           #FAF8F2;       /* Warm Champagne Canvas */
+  --color-bg-alt:       #EFECD7;       /* Figma Warm Cream Linen */
   --color-surface:      #FFFFFF;
-  --color-surface-2:    #F1F3F8;
-  --color-surface-3:    #E5E8F2;
-  --color-border:       rgba(0, 0, 0, 0.08);
-  --color-border-hover: rgba(168, 123, 46, 0.4);
+  --color-surface-2:    #F6F3E7;
+  --color-surface-3:    #EBE6D5;
+  --color-border:       rgba(31, 27, 28, 0.10);
+  --color-border-hover: rgba(225, 26, 69, 0.35);
 
-  --color-gold:         #D4AF37;
-  --color-gold-light:   #F3E5AB;
-  --color-gold-dark:    #B8860B;
-  --color-gold-glow:    rgba(212, 175, 55, 0.25);
+  --color-gold:         #D4A017;
+  --color-gold-light:   #EDC92C;
+  --color-gold-dark:    #9A7206;
+  --color-gold-glow:    rgba(237, 201, 44, 0.22);
 
-  --color-accent:       #E94560;
-  --color-accent-light: #FF6B84;
-  --color-accent-dark:  #C4293F;
-  --color-accent-glow:  rgba(233, 69, 96, 0.12);
+  --color-accent:       #E11A45;
+  --color-accent-light: #FF4D79;
+  --color-accent-dark:  #BA0F36;
+  --color-accent-glow:  rgba(225, 26, 69, 0.20);
 
-  --color-text:         #121324;
-  --color-text-muted:   #4F5268;
-  --color-text-faint:   #7E8299;
+  --color-text:         #1F1B1C;       /* Figma Ink Charcoal */
+  --color-text-muted:   #5A5456;
+  --color-text-faint:   #8C8487;
 
-  --color-success:      #16A34A;
+  --color-success:      #059669;
   --color-warning:      #D97706;
   --color-error:        #DC2626;
   --color-info:         #2563EB;
 
-  --gradient-gold:      linear-gradient(135deg, #E5A93C 0%, #D4AF37 50%, #C28D24 100%);
-  --gradient-hero:      linear-gradient(135deg, #F8F9FC 0%, #FFFFFF 50%, #F1F3F8 100%);
-  --gradient-card:      linear-gradient(145deg, #FFFFFF 0%, #F8F9FC 100%);
-  --shadow-sm:          0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md:          0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg:          0 10px 30px rgba(0,0,0,0.1);
-  --shadow-xl:          0 20px 50px rgba(0,0,0,0.12);
+  --gradient-gold:      linear-gradient(135deg, #EDC92C 0%, #D4A017 100%);
+  --gradient-brand:     linear-gradient(135deg, #E11A45 0%, #FF4D79 100%);
+  --gradient-accent:    linear-gradient(135deg, #E11A45 0%, #EDC92C 100%);
+  --gradient-hero:      linear-gradient(135deg, #FAF8F2 0%, #EFECD7 50%, #F6F3E7 100%);
+  --gradient-card:      linear-gradient(145deg, #FFFFFF 0%, #FAF8F2 100%);
+  --shadow-sm:          0 2px 6px rgba(31,27,28,0.05);
+  --shadow-md:          0 6px 20px rgba(31,27,28,0.08);
+  --shadow-lg:          0 12px 35px rgba(31,27,28,0.11);
+  --shadow-xl:          0 24px 60px rgba(31,27,28,0.14);
 }
 
 /* Light Mode Global Elements & Background Enforcements */
@@ -1029,4 +1055,104 @@ body[data-theme="light"],
 
 [data-theme="light"] #page-loader {
   background: #F8F9FC !important;
+}
+
+/* ============================================================
+   FIGMA LUXE EDITORIAL TYPOGRAPHY & ACCENT STYLES
+   ============================================================ */
+.hero-title, .section-title, .page-title, .product-card-title, .category-card-name, .navbar-logo-text {
+  font-family: var(--font-display);
+}
+
+.hero-title {
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+.hero-title .highlight {
+  background: linear-gradient(135deg, #EDC92C 0%, #FF4D79 50%, #E11A45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.hero-eyebrow {
+  border-color: rgba(237, 201, 44, 0.35) !important;
+  color: var(--color-gold) !important;
+  background: rgba(237, 201, 44, 0.08) !important;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-eyebrow-dot {
+  background: var(--color-accent) !important;
+  box-shadow: 0 0 10px var(--color-accent) !important;
+}
+
+.navbar-logo-icon {
+  background: linear-gradient(135deg, #EDC92C 0%, #E11A45 100%) !important;
+  color: #1F1B1C !important;
+  font-family: var(--font-display) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 15px rgba(237, 201, 44, 0.3) !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #EDC92C 0%, #E8B918 100%) !important;
+  color: #1F1B1C !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(237, 201, 44, 0.35) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #FBE676 0%, #EDC92C 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(237, 201, 44, 0.5) !important;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #E11A45 0%, #FF4D79 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 20px rgba(225, 26, 69, 0.35) !important;
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(225, 26, 69, 0.5) !important;
+}
+
+.badge-new, .badge-hot {
+  background: linear-gradient(135deg, #E11A45 0%, #FF4D79 100%) !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(225, 26, 69, 0.4);
+}
+
+.badge-sale, .discount-badge {
+  background: linear-gradient(135deg, #EDC92C 0%, #F59E0B 100%) !important;
+  color: #1F1B1C !important;
+  font-weight: 800;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(237, 201, 44, 0.4);
+}
+
+.product-card {
+  border-color: rgba(237, 201, 44, 0.14) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.product-card:hover {
+  border-color: rgba(237, 201, 44, 0.45) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(237, 201, 44, 0.15) !important;
+  transform: translateY(-6px);
+}
+
+.product-price-current {
+  color: var(--color-gold) !important;
+  font-weight: 700;
 }
